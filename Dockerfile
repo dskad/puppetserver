@@ -14,7 +14,7 @@ ARG PUPPETSERVER_VERSION
 
 ENV TERM=linux \
     PATH="/opt/puppetlabs/puppet/bin:/opt/puppetlabs/server/bin:$PATH" \
-    BOOTSTRAPENV="bootstrap" \
+    BOOTSTRAPENV="bootstrap-sysd" \
     DNSALTNAMES="puppet,puppet.example.com"
 
 ## Add Facter environment variables to be used in puppet manifests
@@ -76,4 +76,5 @@ ONBUILD VOLUME /var/log/puppetlabs
 #       Add an additional volume in derived docker files if the cachdir
 #       is in a different location
 ONBUILD VOLUME /var/cache/r10k
+ENTRYPOINT ["/docker-entrypoint.sh"]
 CMD ["/usr/sbin/init"]
