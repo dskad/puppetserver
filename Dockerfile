@@ -45,7 +45,7 @@ RUN rpm --import http://mirror.centos.org/centos/RPM-GPG-KEY-CentOS-7 \
 RUN yum -y install puppetserver${PUPPETSERVER_VERSION:+-}${PUPPETSERVER_VERSION} \
     && yum clean all
 RUN gem install r10k generate-puppetfile --no-document
-COPY journal-console.service /usr/lib/systemd/journal-console.service
+COPY journal-console.service /usr/lib/systemd/system/journal-console.service
 COPY logback.xml /etc/puppetlabs/puppetserver/logback.xml
 COPY ezbake-functions.sh /opt/puppetlabs/server/apps/puppetserver/ezbake-functions.sh
 RUN systemctl enable puppetserver.service
