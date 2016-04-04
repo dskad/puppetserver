@@ -1,0 +1,74 @@
+#! /bin/bash
+#
+# Useful shell functions for programs packaged with ezbake.
+#
+
+#
+# Wait `timeout` seconds for the application identified by `pid to bind to any
+# TCP port
+#
+wait_for_app()
+{
+    local pid=${1:?}
+    local timeout=${2:-120}
+
+    while : ;do
+
+        # verify the process is still running; if not, return failure
+        ps -p $pid 2>&1 > /dev/null
+        if [ "$?" != 0 ]; then
+            return 1
+        fi
+
+        # if there are any TCP ports associated with the process, return success
+        #netstat -tulpn 2>/dev/null | grep "$pid" 2>&1 >/dev/null
+        (echo > /dev/tcp/localhost/8140) >/dev/null 2>&1
+        if [ "$?" = 0 ]; then
+            return 0
+        fi
+
+        # if we reach the timeout, return failure
+        if [ "$timeout" = 0 ]; then
+            return 1
+        fi
+
+        sleep 1
+        timeout=$(($timeout-1))
+    done
+}
+
+
+#
+# Wait `timeout` seconds for `pidfile` to be created, otherwise return failure.
+# Default timeout is 5 seconds.
+#
+wait_for_pidfile()
+{
+    local pidfile=${1:?}
+    local timeout=${2:-5}
+
+    while [ ! -s "$pidfile" ] ;do
+        sleep 1
+
+        # if we reach the timeout, return failure
+        if [ "$timeout" -eq 0 ] ;then
+            return 1
+        fi
+
+        timeout=$(($timeout-1))
+    done
+
+    return 0
+}
+
+if [ "$0" = "$BASH_SOURCE" ] ;then
+    COMMAND=${1:?}
+    export $(systemctl show -p MainPID puppetserver.service)
+    case $COMMAND in
+        wait_for_app)
+            wait_for_app ${MainPID:?} ${START_TIMEOUT:-120}
+        ;;
+        *)
+        ;;
+    esac
+fi
