@@ -1,4 +1,4 @@
-FROM sysd-base
+FROM cent-sysd-puppet
 
 MAINTAINER Dan Skadra <dskadra@gmail.com>
 
