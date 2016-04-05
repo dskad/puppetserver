@@ -1,4 +1,4 @@
-FROM cent-sysd-puppet
+FROM centos-systemd
 
 MAINTAINER Dan Skadra <dskadra@gmail.com>
 
