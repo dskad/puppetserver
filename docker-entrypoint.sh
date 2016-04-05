@@ -4,7 +4,7 @@ set -euo pipefail
 IFS=$'\n\t'
 
 # This section runs before supervisor and is good for initalization or pre-startup tasks
-if [ $1 = "supervisord" ]; then
+if [ $1 = "/usr/sbin/init" ]; then
 
   ## Only initalize and setup the environments (via r10k) if server is launching
   ##    for the first time (i.e. new server container). We don't want to unintentionally
@@ -16,7 +16,8 @@ if [ $1 = "supervisord" ]; then
     # Generate puppetserver host certificates named from the container hostname
     # (docker run --host <hostname for container>)
     # Prevents partial state error when starting puppet and puppetserver at the
-    # same time. See https://tickets.puppetlabs.com/browse/SERVER-528
+    # same time. See https://tickets.puppetlabs.com/browse/SERVER-528 and
+    # https://tickets.puppetlabs.com/browse/SERVER-1233
     puppet cert generate $(facter fqdn) --dns_alt_names=${DNSALTNAMES},$(facter hostname) -v
 
     # Run r10k to sync environments with modules
