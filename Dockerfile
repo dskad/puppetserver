@@ -45,10 +45,12 @@ RUN rpm --import http://mirror.centos.org/centos/RPM-GPG-KEY-CentOS-7 \
 RUN yum -y install puppetserver${PUPPETSERVER_VERSION:+-}${PUPPETSERVER_VERSION} \
     && yum clean all
 RUN gem install r10k generate-puppetfile --no-document
+
 COPY journal-console.service /usr/lib/systemd/system/journal-console.service
 COPY logback.xml /etc/puppetlabs/puppetserver/logback.xml
 COPY ezbake-functions.sh /opt/puppetlabs/server/apps/puppetserver/ezbake-functions.sh
 COPY docker-entrypoint.sh /docker-entrypoint.sh
+
 RUN chmod +x /docker-entrypoint.sh
 RUN systemctl enable puppetserver.service
 RUN systemctl enable puppet.service
@@ -78,5 +80,5 @@ ONBUILD VOLUME /var/log/puppetlabs
 #       Add an additional volume in derived docker files if the cachdir
 #       is in a different location
 ONBUILD VOLUME /var/cache/r10k
-ENTRYPOINT ["/docker-entrypoint.sh"]
-CMD ["/usr/sbin/init"]
+ONBUILD ENTRYPOINT ["/docker-entrypoint.sh"]
+ONBUILD CMD ["/usr/sbin/init"]
