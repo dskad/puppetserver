@@ -48,6 +48,7 @@ RUN gem install r10k generate-puppetfile --no-document
 COPY journal-console.service /usr/lib/systemd/system/journal-console.service
 COPY logback.xml /etc/puppetlabs/puppetserver/logback.xml
 COPY ezbake-functions.sh /opt/puppetlabs/server/apps/puppetserver/ezbake-functions.sh
+COPY docker-entrypoint.sh /docker-entrypoint.sh
 RUN systemctl enable puppetserver.service
 RUN systemctl enable puppet.service
 RUN systemctl enable journal-console.service
