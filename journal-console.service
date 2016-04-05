@@ -5,7 +5,7 @@ After=systemd-user-sessions.service systemd-journald.service
 ConditionPathExists=/dev/console
 
 [Service]
-ExecStart=/bin/sh -c "exec /bin/journalctl -af > /dev/%I"
+ExecStart=/bin/sh -c "exec /bin/journalctl -af > /dev/console"
 Type=idle
 Restart=always
 RestartSec=1
