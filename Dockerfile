@@ -14,7 +14,7 @@ ARG PUPPETSERVER_VERSION
 
 ENV TERM=linux \
     PATH="/opt/puppetlabs/puppet/bin:/opt/puppetlabs/server/bin:$PATH" \
-    BOOTSTRAPENV="bootstrap-sysd" \
+    BOOTSTRAPENV="bootstrap_sysd" \
     DNSALTNAMES="puppet,puppet.example.com"
 
 ## Add Facter environment variables to be used in puppet manifests

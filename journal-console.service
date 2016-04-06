@@ -6,7 +6,7 @@ ConditionPathExists=/dev/console
 
 [Service]
 ExecStart=/bin/sh -c "exec /bin/journalctl -af > /dev/console"
-Type=idle
+Type=simple
 Restart=always
 RestartSec=1
 KillMode=process
