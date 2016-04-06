@@ -2,9 +2,13 @@
 ## unoficial "strict mode" http://redsymbol.net/articles/unofficial-bash-strict-mode/
 set -euo pipefail
 IFS=$'\n\t'
-
+echo $1
 # This section runs before supervisor and is good for initalization or pre-startup tasks
 if [ $1 = "/usr/sbin/init" ]; then
+  ## Create /var/run/puppetlabs directory as this will go missing since we are mounting tmpfs here
+  ## Puppetserver startup doesn't recreate this directory
+  ## https://tickets.puppetlabs.com/browse/SERVER-441
+  mkdir -p /run/puppetlabs
 
   ## Only initalize and setup the environments (via r10k) if server is launching
   ##    for the first time (i.e. new server container). We don't want to unintentionally
