@@ -39,22 +39,21 @@ RUN rpm --import http://mirror.centos.org/centos/RPM-GPG-KEY-CentOS-7 \
         git \
         less \
         which \
-    && yum clean all
-
-## Need to run this separatly. puppet user doesn't get created otherwise
-RUN yum -y install puppetserver${PUPPETSERVER_VERSION:+-}${PUPPETSERVER_VERSION} \
-    && yum clean all
-RUN gem install r10k generate-puppetfile --no-document
+    && yum -y install puppetserver${PUPPETSERVER_VERSION:+-}${PUPPETSERVER_VERSION} \
+    && yum clean all \
+    && gem install r10k generate-puppetfile --no-document --verbose
 
 COPY journal-console.service /usr/lib/systemd/system/journal-console.service
+COPY quiet-console.conf /etc/systemd/system.conf.d/quiet-console.conf
 COPY logback.xml /etc/puppetlabs/puppetserver/logback.xml
 COPY ezbake-functions.sh /opt/puppetlabs/server/apps/puppetserver/ezbake-functions.sh
 COPY docker-entrypoint.sh /docker-entrypoint.sh
 
-RUN chmod +x /docker-entrypoint.sh
-RUN systemctl enable puppetserver.service
-RUN systemctl enable puppet.service
-RUN systemctl enable journal-console.service
+RUN chmod +x /docker-entrypoint.sh \
+    && sed -i -e '/^After=/ s/$/ puppetserver.service/' puppet.service \
+    && systemctl enable puppetserver.service \
+    && systemctl enable puppet.service \
+    && systemctl enable journal-console.service
 
 EXPOSE 8140
 
@@ -68,17 +67,14 @@ ONBUILD ARG R10KCONFIG="r10k.yaml"
 ONBUILD ADD ${R10KCONFIG} /etc/puppetlabs/r10k/r10k.yaml
 
 ## Save the important stuff!
-## For the Agent
-ONBUILD VOLUME /etc/puppetlabs
-ONBUILD VOLUME /opt/puppetlabs/puppet/cache
-
-# And puppetserver
-ONBUILD VOLUME /opt/puppetlabs/server/data/puppetserver
-ONBUILD VOLUME /var/log/puppetlabs
-
-# Note: This needs to match the cachdir value in your r10k.conf file
+# Note: /var/cache/r10k needs to match the cachdir value in your r10k.conf file
 #       Add an additional volume in derived docker files if the cachdir
 #       is in a different location
-ONBUILD VOLUME /var/cache/r10k
+ONBUILD VOLUME ["/etc/puppetlabs", \
+                "/opt/puppetlabs/puppet/cache", \
+                "/opt/puppetlabs/server/data/puppetserver", \
+                "/var/log/puppetlabs", \
+                "/var/cache/r10k" ]
+
 ONBUILD ENTRYPOINT ["/docker-entrypoint.sh"]
 ONBUILD CMD ["/usr/sbin/init"]

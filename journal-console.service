@@ -1,7 +1,10 @@
 [Unit]
 Description=Journal tail on console
-Documentation=man:journalctl(1)
-After=systemd-user-sessions.service systemd-journald.service
+#Documentation=man:journalctl(1)
+DefaultDependencies=no
+Requires=systemd-journald.service
+After=systemd-journald.service
+Before=sysinit.target
 ConditionPathExists=/dev/console
 
 [Service]
@@ -14,7 +17,8 @@ IgnoreSIGPIPE=no
 
 # Unset locale for the console getty since the console has problems
 # displaying some internationalized messages.
-Environment=LANG= LANGUAGE= LC_CTYPE= LC_NUMERIC= LC_TIME= LC_COLLATE= LC_MONETARY= LC_MESSAGES= LC_PAPER= LC_NAME= LC_ADDRESS= LC_TELEPHONE= LC_MEASUREMENT= LC_IDENTIFICATION=
+Environment=LANG= LANGUAGE= LC_CTYPE= LC_NUMERIC= LC_TIME= LC_COLLATE= LC_MONETARY= LC_MESSAGES= LC_PAPER= LC_NAME= LC_ADDRESS= LC_TELEPHONE= LC_MEASUREMENT= LC_IDENTIFICAT
+ION=
 
 [Install]
-Alias=getty.target.wants/journal-console.service
+WantedBy=basic.target
