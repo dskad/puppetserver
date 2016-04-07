@@ -43,8 +43,11 @@ RUN rpm --import http://mirror.centos.org/centos/RPM-GPG-KEY-CentOS-7 \
         which \
     && yum -y install puppetserver${PUPPETSERVER_VERSION:+-}${PUPPETSERVER_VERSION} \
     && yum clean all \
-    && gem install r10k generate-puppetfile --no-document --verbose \
-    && (cd /lib/systemd/system/sysinit.target.wants/; for i in *; do [ $i == systemd-tmpfiles-setup.service ] || rm -f $i; done); \
+    && gem install r10k generate-puppetfile --no-document \
+    ## the below section cleans up systemd to allow it to run in a container
+    && (cd /lib/systemd/system/sysinit.target.wants/; for i in *; \
+        do [ $i == systemd-tmpfiles-setup.service ] || rm -f $i; \
+       done); \
     rm -f /lib/systemd/system/multi-user.target.wants/*;\
     rm -f /etc/systemd/system/*.wants/*;\
     rm -f /lib/systemd/system/local-fs.target.wants/*; \
@@ -56,24 +59,24 @@ RUN rpm --import http://mirror.centos.org/centos/RPM-GPG-KEY-CentOS-7 \
 ## Files to send journal logs to stdout for docker logs
 COPY journal-console.service /usr/lib/systemd/system/journal-console.service
 COPY quiet-console.conf /etc/systemd/system.conf.d/quiet-console.conf
-#COPY logback.xml /etc/puppetlabs/puppetserver/logback.xml
+COPY logback.xml /etc/puppetlabs/puppetserver/logback.xml
 
-## Update to use /dev/tcp/localhost/8140 instead of netstat to determine when the
-## server is up. netstat needs privlidge escalations to run in a container
-#COPY ezbake-functions.sh /opt/puppetlabs/server/apps/puppetserver/ezbake-functions.sh
-# RUN sed -i '/netstat -tulpn 2/c\(echo > /dev/tcp/localhost/8140) >/dev/null 2>&1' \
-#             /opt/puppetlabs/server/apps/puppetserver/ezbake-functions.sh
+# COPY ezbake-functions.sh /opt/puppetlabs/server/apps/puppetserver/ezbake-functions.sh
 
 COPY docker-entrypoint.sh /docker-entrypoint.sh
 
-RUN chmod +x /docker-entrypoint.sh \
-    && sed -i '/netstat -tulpn 2/c\(echo > /dev/tcp/localhost/8140) >/dev/null 2>&1' \
+## Update to use /dev/tcp/localhost/8140 instead of netstat to determine when the
+##    server is up. netstat needs privlidge escalations to run in a container.
+## Update puppet service to start after puppetserver is fully up. Preventing strange
+##    errors in the logs.
+RUN sed -i '/netstat -tulpn 2/c\(echo > /dev/tcp/localhost/8140) >/dev/null 2>&1' \
             /opt/puppetlabs/server/apps/puppetserver/ezbake-functions.sh \
     && sed -i -e '/^After=/ s/$/ puppetserver.service/' \
             /usr/lib/systemd/system/puppet.service \
     && systemctl enable puppetserver.service \
     && systemctl enable puppet.service \
-    && systemctl enable journal-console.service
+    && systemctl enable journal-console.service \
+    && chmod +x /docker-entrypoint.sh
 
 VOLUME [ "/sys/fs/cgroup" ]
 EXPOSE 8140
