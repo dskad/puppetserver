@@ -50,7 +50,7 @@ COPY ezbake-functions.sh /opt/puppetlabs/server/apps/puppetserver/ezbake-functio
 COPY docker-entrypoint.sh /docker-entrypoint.sh
 
 RUN chmod +x /docker-entrypoint.sh \
-    && sed -i -e '/^After=/ s/$/ puppetserver.service/' puppet.service \
+    && sed -i -e '/^After=/ s/$/ puppetserver.service/' /usr/lib/systemd/system/puppet.service \
     && systemctl enable puppetserver.service \
     && systemctl enable puppet.service \
     && systemctl enable journal-console.service
