@@ -1,4 +1,4 @@
-FROM centos-systemd
+FROM centos:7
 
 MAINTAINER Dan Skadra <dskadra@gmail.com>
 
@@ -13,6 +13,7 @@ ARG PUPPETSERVER_VERSION
 # ARG PUPPETSERVER_VERSION="2.3.1"
 
 ENV TERM=linux \
+    container=docker \
     PATH="/opt/puppetlabs/puppet/bin:/opt/puppetlabs/server/bin:$PATH" \
     BOOTSTRAPENV="bootstrap_sysd" \
     DNSALTNAMES="puppet,puppet.example.com"
@@ -33,6 +34,7 @@ RUN rpm --import http://mirror.centos.org/centos/RPM-GPG-KEY-CentOS-7 \
     && yum -y install \
         https://yum.puppetlabs.com/puppetlabs-release-pc1-el-7.noarch.rpm \
         epel-release \
+    && yum -y update \
     && yum -y install \
         bash-completion \
         ca-certificates \
@@ -41,20 +43,39 @@ RUN rpm --import http://mirror.centos.org/centos/RPM-GPG-KEY-CentOS-7 \
         which \
     && yum -y install puppetserver${PUPPETSERVER_VERSION:+-}${PUPPETSERVER_VERSION} \
     && yum clean all \
-    && gem install r10k generate-puppetfile --no-document --verbose
+    && gem install r10k generate-puppetfile --no-document --verbose \
+    && (cd /lib/systemd/system/sysinit.target.wants/; for i in *; do [ $i == systemd-tmpfiles-setup.service ] || rm -f $i; done); \
+    rm -f /lib/systemd/system/multi-user.target.wants/*;\
+    rm -f /etc/systemd/system/*.wants/*;\
+    rm -f /lib/systemd/system/local-fs.target.wants/*; \
+    rm -f /lib/systemd/system/sockets.target.wants/*udev*; \
+    rm -f /lib/systemd/system/sockets.target.wants/*initctl*; \
+    rm -f /lib/systemd/system/basic.target.wants/*;\
+    rm -f /lib/systemd/system/anaconda.target.wants/*;
 
+## Files to send journal logs to stdout for docker logs
 COPY journal-console.service /usr/lib/systemd/system/journal-console.service
 COPY quiet-console.conf /etc/systemd/system.conf.d/quiet-console.conf
-COPY logback.xml /etc/puppetlabs/puppetserver/logback.xml
-COPY ezbake-functions.sh /opt/puppetlabs/server/apps/puppetserver/ezbake-functions.sh
+#COPY logback.xml /etc/puppetlabs/puppetserver/logback.xml
+
+## Update to use /dev/tcp/localhost/8140 instead of netstat to determine when the
+## server is up. netstat needs privlidge escalations to run in a container
+#COPY ezbake-functions.sh /opt/puppetlabs/server/apps/puppetserver/ezbake-functions.sh
+# RUN sed -i '/netstat -tulpn 2/c\(echo > /dev/tcp/localhost/8140) >/dev/null 2>&1' \
+#             /opt/puppetlabs/server/apps/puppetserver/ezbake-functions.sh
+
 COPY docker-entrypoint.sh /docker-entrypoint.sh
 
 RUN chmod +x /docker-entrypoint.sh \
-    && sed -i -e '/^After=/ s/$/ puppetserver.service/' /usr/lib/systemd/system/puppet.service \
+    && sed -i '/netstat -tulpn 2/c\(echo > /dev/tcp/localhost/8140) >/dev/null 2>&1' \
+            /opt/puppetlabs/server/apps/puppetserver/ezbake-functions.sh \
+    && sed -i -e '/^After=/ s/$/ puppetserver.service/' \
+            /usr/lib/systemd/system/puppet.service \
     && systemctl enable puppetserver.service \
     && systemctl enable puppet.service \
     && systemctl enable journal-console.service
 
+VOLUME [ "/sys/fs/cgroup" ]
 EXPOSE 8140
 
 ## This ONBUILD section creates a derived image that will configure r10k for the
@@ -76,5 +97,5 @@ ONBUILD VOLUME ["/etc/puppetlabs", \
                 "/var/log/puppetlabs", \
                 "/var/cache/r10k" ]
 
-ONBUILD ENTRYPOINT ["/docker-entrypoint.sh"]
-ONBUILD CMD ["/usr/sbin/init"]
+ENTRYPOINT ["/docker-entrypoint.sh"]
+CMD ["/usr/sbin/init"]
