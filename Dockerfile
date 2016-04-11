@@ -12,8 +12,8 @@ ENV BOOTSTRAPENV=bootstrap \
     DNSALTNAMES="puppet,puppet.example.com" \
     PATH="/opt/puppetlabs/puppet/bin:/opt/puppetlabs/server/bin:$PATH" \
     container=docker \
-    LANG=en_US.utf8
-    TERM=linux \
+    LANG=en_US.utf8 \
+    TERM=linux
 
 ## Set locale to en_US.UTF-8 prevent odd puppet errors in containers
 ## Add puppet PC1 repo, install puppet agent and clear ssl folder (to be regenerated in container)
