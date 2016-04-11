@@ -30,7 +30,7 @@ if [ $1 = "/usr/sbin/init" ]; then
     # Apply inital config on startup.
     puppet apply --environment=${BOOTSTRAPENV} \
     /etc/puppetlabs/code/environments/${BOOTSTRAPENV}/manifests/site.pp
-  else
+  # else
     # TODO fix the supervisor provider to allow confdir location paramaters
 
     # The container is already initialized. Make sure container configuration is
@@ -40,9 +40,9 @@ if [ $1 = "/usr/sbin/init" ]; then
 
     # Note: contaner hostname needs to stay the same across container startups or else
     # the signed host certificate and hostname will not match, causing random errors
-    currrent_env=$(puppet config print environment)
-    puppet apply --environment=${currrent_env} \
-    /etc/puppetlabs/code/environments/${currrent_env}/manifests/site.pp
+    # currrent_env=$(puppet config print environment)
+    # puppet apply --environment=${currrent_env} \
+    # /etc/puppetlabs/code/environments/${currrent_env}/manifests/site.pp
   fi
 fi
 

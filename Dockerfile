@@ -2,25 +2,20 @@ FROM centos:7
 
 MAINTAINER Dan Skadra <dskadra@gmail.com>
 
-## Set locale to en_US.UTF-8 prevent odd puppet errors in containers
-RUN localedef -i en_US -c -f UTF-8 -A /usr/share/locale/locale.alias en_US.UTF-8
-ENV LANG en_US.utf8
-
 ## Latest by default, uncomment to pin specific versions or supply with --build-arg PUPPETSERVER_VERSION
 ## Requires docker-engine >= 1.9
 ARG PUPPETSERVER_VERSION
 # ARG PUPPETSERVER_VERSION="2.3.*"
 # ARG PUPPETSERVER_VERSION="2.3.1"
 
-ENV TERM=linux \
-    container=docker \
+ENV BOOTSTRAPENV=bootstrap \
+    DNSALTNAMES="puppet,puppet.example.com" \
     PATH="/opt/puppetlabs/puppet/bin:/opt/puppetlabs/server/bin:$PATH" \
-    BOOTSTRAPENV="bootstrap_sysd" \
-    DNSALTNAMES="puppet,puppet.example.com"
+    container=docker \
+    LANG=en_US.utf8
+    TERM=linux \
 
-## Add Facter environment variables to be used in puppet manifests
-## e.x. "ENV FACTER_PUPPETSERVER=${PUPPETSERVER}"
-
+## Set locale to en_US.UTF-8 prevent odd puppet errors in containers
 ## Add puppet PC1 repo, install puppet agent and clear ssl folder (to be regenerated in container)
 ## Note: Puppetserver creates the user and group puppet and drops the running server to these permissions
 ##       The following are owned by this user/group, the rest of the install is owned by root
@@ -28,7 +23,8 @@ ENV TERM=linux \
 ##          /opt/puppetlabs/server/data/puppetserver/*
 ##          /var/log/puppetlabs/puppetserver/*
 ##          /etc/puppetlabs/puppet/ssl/*
-RUN rpm --import http://mirror.centos.org/centos/RPM-GPG-KEY-CentOS-7 \
+RUN localedef -i en_US -c -f UTF-8 -A /usr/share/locale/locale.alias en_US.UTF-8 \
+    && rpm --import http://mirror.centos.org/centos/RPM-GPG-KEY-CentOS-7 \
         --import https://dl.fedoraproject.org/pub/epel/RPM-GPG-KEY-EPEL-7 \
         --import https://yum.puppetlabs.com/RPM-GPG-KEY-puppetlabs \
     && yum -y install \
