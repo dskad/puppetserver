@@ -92,6 +92,7 @@ ONBUILD ADD ${R10KCONFIG} /etc/puppetlabs/r10k/r10k.yaml
 #       is in a different location
 ONBUILD VOLUME ["/etc/puppetlabs", \
                 "/opt/puppetlabs/puppet/cache", \
+                "/opt/puppetlabs/puppet/lib", \
                 "/opt/puppetlabs/server/data/puppetserver", \
                 "/var/log/puppetlabs", \
                 "/var/cache/r10k" ]
