@@ -46,11 +46,12 @@ if [ $1 = "/usr/sbin/init" ]; then
     # puppet apply --environment=${currrent_env} \
     # /etc/puppetlabs/code/environments/${currrent_env}/manifests/site.pp
   fi
+
   ## Set puppet.conf settings
-  sed -i "s/SETSERVER/${PUPPETSERVER}/" /etc/puppetlabs/puppet/puppet.conf
-  sed -i "s/SETENV/${PUPPETENV}/" /etc/puppetlabs/puppet/puppet.conf
-  sed -i "s/SETRUNINTERVAL/${RUNINTERVAL}/" /etc/puppetlabs/puppet/puppet.conf
-  sed -i "s/SETWAITFORCERT/${WAITFORCERT}/" /etc/puppetlabs/puppet/puppet.conf
+  sed -i "s/puppetservername/${PUPPETSERVER}/" /etc/puppetlabs/puppet/puppet.conf
+  sed -i "s/production/${PUPPETENV}/" /etc/puppetlabs/puppet/puppet.conf
+  sed -i "s/5m/${RUNINTERVAL}/" /etc/puppetlabs/puppet/puppet.conf
+  sed -i "s/15s/${WAITFORCERT}/" /etc/puppetlabs/puppet/puppet.conf
 
   sed -i "/JAVA_ARGS/ c\\JAVA_ARGS=\"${JAVA_ARGS}\"" /etc/sysconfig/puppetserver
 
