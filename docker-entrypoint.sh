@@ -1,6 +1,7 @@
 #!/bin/bash
 ## unoficial "strict mode" http://redsymbol.net/articles/unofficial-bash-strict-mode/
-set -euo pipefail
+## with modification, we want unbound variables to allow extra runtime configs
+set -eo pipefail
 IFS=$'\n\t'
 echo $1
 # This section runs before supervisor and is good for initalization or pre-startup tasks
