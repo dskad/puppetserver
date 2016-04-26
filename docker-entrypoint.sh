@@ -3,7 +3,7 @@
 ## with modification, we want unbound variables to allow extra runtime configs
 set -eo pipefail
 IFS=$'\n\t'
-echo $1
+
 # This section runs before supervisor and is good for initalization or pre-startup tasks
 if [ $1 = "/usr/sbin/init" ]; then
   ## Create /var/run/puppetlabs directory as this will go missing since we are mounting tmpfs here
@@ -20,17 +20,17 @@ if [ $1 = "/usr/sbin/init" ]; then
   sed -i "/JAVA_ARGS/ c\\JAVA_ARGS=\"${JAVA_ARGS}\"" /etc/sysconfig/puppetserver
 
   ## Set extra options for puppet agent if variable is set
-  if [ -z ${PUPPET_EXTRA_OPTS+x} ]; then
+  if [ -v PUPPET_EXTRA_OPTS ]; then
     echo PUPPET_EXTRA_OPTS=${PUPPET_EXTRA_OPTS} >> /etc/sysconfig/puppet
   fi
 
   ## Set extra options for mcollective if variable is set
-  if [ -z ${MCO_DAEMON_OPTS+x} ]; then
+  if [ -v MCO_DAEMON_OPTS ]; then
     echo MCO_DAEMON_OPTS=${MCO_DAEMON_OPTS} >> /etc/sysconfig/mcollective
   fi
 
   ## Set extra options for pxp-agent if variable is set
-  if [ -z ${PXP_AGENT_OPTIONS+x} ]; then
+  if [ -v PXP_AGENT_OPTIONS ]; then
     echo PXP_AGENT_OPTIONS=${PXP_AGENT_OPTIONS} >> /etc/sysconfig/pxp-agent
   fi
 
