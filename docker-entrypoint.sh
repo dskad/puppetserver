@@ -11,29 +11,6 @@ if [ $1 = "/usr/sbin/init" ]; then
   ## https://tickets.puppetlabs.com/browse/SERVER-441
   mkdir -p /run/puppetlabs
 
-  ## Set puppet.conf settings
-  sed -i "s/SETSERVER/${PUPPETSERVER}/" /etc/puppetlabs/puppet/puppet.conf
-  sed -i "s/SETENV/${PUPPETENV}/" /etc/puppetlabs/puppet/puppet.conf
-  sed -i "s/SETRUNINTERVAL/${RUNINTERVAL}/" /etc/puppetlabs/puppet/puppet.conf
-  sed -i "s/SETWAITFORCERT/${WAITFORCERT}/" /etc/puppetlabs/puppet/puppet.conf
-
-  sed -i "/JAVA_ARGS/ c\\JAVA_ARGS=\"${JAVA_ARGS}\"" /etc/sysconfig/puppetserver
-
-  ## Set extra options for puppet agent if variable is set
-  if [ -v PUPPET_EXTRA_OPTS ]; then
-    echo PUPPET_EXTRA_OPTS=${PUPPET_EXTRA_OPTS} >> /etc/sysconfig/puppet
-  fi
-
-  ## Set extra options for mcollective if variable is set
-  if [ -v MCO_DAEMON_OPTS ]; then
-    echo MCO_DAEMON_OPTS=${MCO_DAEMON_OPTS} >> /etc/sysconfig/mcollective
-  fi
-
-  ## Set extra options for pxp-agent if variable is set
-  if [ -v PXP_AGENT_OPTIONS ]; then
-    echo PXP_AGENT_OPTIONS=${PXP_AGENT_OPTIONS} >> /etc/sysconfig/pxp-agent
-  fi
-
   ## Only initalize and setup the environments (via r10k) if server is launching
   ##    for the first time (i.e. new server container). We don't want to unintentionally
   ##    upgrade an environment or break certs on a container restart or upgrade.
@@ -69,6 +46,29 @@ if [ $1 = "/usr/sbin/init" ]; then
     # puppet apply --environment=${currrent_env} \
     # /etc/puppetlabs/code/environments/${currrent_env}/manifests/site.pp
   fi
+  ## Set puppet.conf settings
+  sed -i "s/SETSERVER/${PUPPETSERVER}/" /etc/puppetlabs/puppet/puppet.conf
+  sed -i "s/SETENV/${PUPPETENV}/" /etc/puppetlabs/puppet/puppet.conf
+  sed -i "s/SETRUNINTERVAL/${RUNINTERVAL}/" /etc/puppetlabs/puppet/puppet.conf
+  sed -i "s/SETWAITFORCERT/${WAITFORCERT}/" /etc/puppetlabs/puppet/puppet.conf
+
+  sed -i "/JAVA_ARGS/ c\\JAVA_ARGS=\"${JAVA_ARGS}\"" /etc/sysconfig/puppetserver
+
+  ## Set extra options for puppet agent if variable is set
+  if [ -v PUPPET_EXTRA_OPTS ]; then
+    echo PUPPET_EXTRA_OPTS=${PUPPET_EXTRA_OPTS} >> /etc/sysconfig/puppet
+  fi
+
+  ## Set extra options for mcollective if variable is set
+  if [ -v MCO_DAEMON_OPTS ]; then
+    echo MCO_DAEMON_OPTS=${MCO_DAEMON_OPTS} >> /etc/sysconfig/mcollective
+  fi
+
+  ## Set extra options for pxp-agent if variable is set
+  if [ -v PXP_AGENT_OPTIONS ]; then
+    echo PXP_AGENT_OPTIONS=${PXP_AGENT_OPTIONS} >> /etc/sysconfig/pxp-agent
+  fi
+
 fi
 
 ## Pass control on to the command suppled on the CMD line of the Dockerfile
