@@ -10,6 +10,29 @@ if [ $1 = "/usr/sbin/init" ]; then
   ## https://tickets.puppetlabs.com/browse/SERVER-441
   mkdir -p /run/puppetlabs
 
+  ## Set puppet.conf settings
+  sed -i "s/SETSERVER/${PUPPETSERVER}/" /etc/puppetlabs/puppet/puppet.conf
+  sed -i "s/SETENV/${PUPPETENV}/" /etc/puppetlabs/puppet/puppet.conf
+  sed -i "s/SETRUNINTERVAL/${RUNINTERVAL}/" /etc/puppetlabs/puppet/puppet.conf
+  sed -i "s/SETWAITFORCERT/${WAITFORCERT}/" /etc/puppetlabs/puppet/puppet.conf
+
+  sed -i "/JAVA_ARGS/ c\\JAVA_ARGS=\"${JAVA_ARGS}\"" /etc/sysconfig/puppetserver
+
+  ## Set extra options for puppet agent if variable is set
+  if [ -z ${PUPPET_EXTRA_OPTS+x} ]; then
+    echo PUPPET_EXTRA_OPTS=${PUPPET_EXTRA_OPTS} >> /etc/sysconfig/puppet
+  fi
+
+  ## Set extra options for mcollective if variable is set
+  if [ -z ${MCO_DAEMON_OPTS+x} ]; then
+    echo MCO_DAEMON_OPTS=${MCO_DAEMON_OPTS} >> /etc/sysconfig/mcollective
+  fi
+
+  ## Set extra options for pxp-agent if variable is set
+  if [ -z ${PXP_AGENT_OPTIONS+x} ]; then
+    echo PXP_AGENT_OPTIONS=${PXP_AGENT_OPTIONS} >> /etc/sysconfig/pxp-agent
+  fi
+
   ## Only initalize and setup the environments (via r10k) if server is launching
   ##    for the first time (i.e. new server container). We don't want to unintentionally
   ##    upgrade an environment or break certs on a container restart or upgrade.
@@ -25,11 +48,12 @@ if [ $1 = "/usr/sbin/init" ]; then
     puppet cert generate $(facter fqdn) --dns_alt_names=${DNSALTNAMES},$(facter hostname) -v
 
     # Run r10k to sync environments with modules
+    # This is only run during container setup to prevent unintentional code deployment
     r10k deploy environment --puppetfile -v
 
     # Apply inital config on startup.
-    puppet apply --environment=${BOOTSTRAPENV} \
-    /etc/puppetlabs/code/environments/${BOOTSTRAPENV}/manifests/site.pp
+    # puppet apply --environment=${BOOTSTRAPENV} \
+    # /etc/puppetlabs/code/environments/${BOOTSTRAPENV}/manifests/site.pp
   # else
     # TODO fix the supervisor provider to allow confdir location paramaters
 

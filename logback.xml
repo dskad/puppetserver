@@ -18,6 +18,6 @@
 
     <root level="info">
         <appender-ref ref="STDOUT"/>
-        <!-- <appender-ref ref="F1"/> -->
+        <appender-ref ref="F1"/>
     </root>
 </configuration>
