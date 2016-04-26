@@ -8,6 +8,9 @@ ARG PUPPETSERVER_VERSION
 # ARG PUPPETSERVER_VERSION="2.3.*"
 # ARG PUPPETSERVER_VERSION="2.3.1"
 
+# TODO possibly make the dynamic at launch time
+ARG R10KCONFIG="r10k.yaml"
+
 # TODO Change runinterval and waitforcert
 ENV PATH="/opt/puppetlabs/puppet/bin:/opt/puppetlabs/server/bin:$PATH" \
     container=docker \
@@ -18,8 +21,8 @@ ENV PATH="/opt/puppetlabs/puppet/bin:/opt/puppetlabs/server/bin:$PATH" \
     PUPPETENV=bootstrap \
     RUNINTERVAL=5m \
     WAITFORCERT=15s \
-    JAVA_ARGS="-Xms2g -Xmx2g" \
-    R10KCONFIG="r10k.yaml"
+    JAVA_ARGS="-Xms2g -Xmx2g"
+
 
     # TODO document this
     ## Set these on the command line to add extra options
