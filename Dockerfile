@@ -70,7 +70,7 @@ RUN (cd /lib/systemd/system/sysinit.target.wants/; for i in *; \
   rm -f /lib/systemd/system/anaconda.target.wants/*;
 
 # Install r10k and tools to manage puppet environments and modules
-RUN gem install r10k generate-puppetfile --no-document \
+RUN gem install r10k generate-puppetfile --no-document
 
 ## Files to send journal logs to stdout for docker logs
 COPY journal-console.service /usr/lib/systemd/system/journal-console.service
