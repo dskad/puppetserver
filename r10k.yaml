@@ -16,11 +16,11 @@ cachedir: '/var/cache/r10k'
 sources:
   # Each source should have a unique name, and preferrably should only use
   # alphanumeric characters and underscores.
-  puppetbootstrap:
+  default_repo:
 
     # The 'remote' setting determines the location of the VCS repository used
     # for creating environments.
-    remote: 'http://192.168.10.50/dan/control-repo.git'
+    remote: 'REPOURL'
 
     # The 'basedir' setting specifies where environments will be created for
     # this source. This setting should match the Puppet 'environmentpath'
