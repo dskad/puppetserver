@@ -10,16 +10,6 @@ if [ $1 = "/usr/sbin/init" ]; then
   ## https://tickets.puppetlabs.com/browse/SERVER-441
   mkdir -p /run/puppetlabs
 
-  ## Set puppet.conf settings
-  puppet config set server ${PUPPETSERVER} --section main
-  puppet config set environment ${PUPPETENV} --section main
-  puppet config set runinterval ${RUNINTERVAL} --section agent
-  puppet config set waitforcert ${WAITFORCERT} --section agent
-  puppet config set dns_alt_names ${DNSALTNAMES} --section main
-  puppet config set trusted_server_facts true --section main
-
-  # TODO Add config for puppetserver tuning options
-
   # Set JAVA_ARGS for the server
   sed -i "/JAVA_ARGS/ c\\JAVA_ARGS=\"${JAVA_ARGS}\"" /etc/sysconfig/puppetserver
 
@@ -47,6 +37,16 @@ if [ $1 = "/usr/sbin/init" ]; then
     # This is only run during container setup to prevent unintentional code deployment
     r10k deploy environment --puppetfile -v
   fi
+  ## Set puppet.conf settings
+  puppet config set server ${PUPPETSERVER} --section main
+  puppet config set environment ${PUPPETENV} --section main
+  puppet config set runinterval ${RUNINTERVAL} --section agent
+  puppet config set waitforcert ${WAITFORCERT} --section agent
+  puppet config set dns_alt_names ${DNSALTNAMES} --section main
+  puppet config set trusted_server_facts true --section main
+
+  # TODO Add config for puppetserver tuning options
+
 fi
 
 ## Pass control on to the command suppled on the CMD line of the Dockerfile
