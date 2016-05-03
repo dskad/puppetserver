@@ -4,29 +4,29 @@
 set -eo pipefail
 IFS=$'\n\t'
 
-## Create /var/run/puppetlabs directory as this will go missing since we are mounting tmpfs here
-## Puppetserver startup doesn't recreate this directory
-## https://tickets.puppetlabs.com/browse/SERVER-441
-mkdir -p /run/puppetlabs
-
-## Set puppet.conf settings
-puppet config set server ${PUPPETSERVER} --section main
-puppet config set environment ${PUPPETENV} --section main
-puppet config set runinterval ${RUNINTERVAL} --section agent
-puppet config set waitforcert ${WAITFORCERT} --section agent
-puppet config set dns_alt_names ${DNSALTNAMES} --section main
-puppet config set trusted_server_facts true --section main
-
-# TODO Add config for puppetserver tuning options
-
-# Set JAVA_ARGS for the server
-sed -i "/JAVA_ARGS/ c\\JAVA_ARGS=\"${JAVA_ARGS}\"" /etc/sysconfig/puppetserver
-
-# Set default r10k repo url.
-sed -i "s/REPOURL/${DEFAULT_R10K_REPO_URL}" /etc/puppetlabs/r10k/r10k.yaml
-
-# This section runs before supervisor and is good for initalization or pre-startup tasks
 if [ $1 = "/usr/sbin/init" ]; then
+  ## Create /var/run/puppetlabs directory as this will go missing since we are mounting tmpfs here
+  ## Puppetserver startup doesn't recreate this directory
+  ## https://tickets.puppetlabs.com/browse/SERVER-441
+  mkdir -p /run/puppetlabs
+
+  ## Set puppet.conf settings
+  puppet config set server ${PUPPETSERVER} --section main
+  puppet config set environment ${PUPPETENV} --section main
+  puppet config set runinterval ${RUNINTERVAL} --section agent
+  puppet config set waitforcert ${WAITFORCERT} --section agent
+  puppet config set dns_alt_names ${DNSALTNAMES} --section main
+  puppet config set trusted_server_facts true --section main
+
+  # TODO Add config for puppetserver tuning options
+
+  # Set JAVA_ARGS for the server
+  sed -i "/JAVA_ARGS/ c\\JAVA_ARGS=\"${JAVA_ARGS}\"" /etc/sysconfig/puppetserver
+
+  # Set default r10k repo url.
+  sed -i "s/REPOURL/${DEFAULT_R10K_REPO_URL}" /etc/puppetlabs/r10k/r10k.yaml
+
+  # This section runs before supervisor and is good for initalization or pre-startup tasks
   ## Only initalize and setup the environments (via r10k) if server is launching
   ##    for the first time (i.e. new server container). We don't want to unintentionally
   ##    upgrade an environment or break certs on a container restart or upgrade.
