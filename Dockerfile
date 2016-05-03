@@ -23,7 +23,7 @@ ENV PATH="/opt/puppetlabs/puppet/bin:/opt/puppetlabs/server/bin:$PATH" \
 ## Set locale to en_US.UTF-8 prevent odd puppet errors in containers
 RUN localedef -i en_US -c -f UTF-8 -A /usr/share/locale/locale.alias en_US.UTF-8
 
-# Import repository keys
+## Import repository keys
 RUN rpm --import http://mirror.centos.org/centos/RPM-GPG-KEY-CentOS-7 \
   --import https://dl.fedoraproject.org/pub/epel/RPM-GPG-KEY-EPEL-7 \
   --import https://yum.puppetlabs.com/RPM-GPG-KEY-puppetlabs
@@ -96,17 +96,17 @@ RUN grep -q ExecReload /usr/lib/systemd/system/puppetserver.service || \
   sed -i '/^KillMode=/ i\ExecReload=/bin/kill -HUP ${MAINPID}\n' \
       /usr/lib/systemd/system/puppetserver.service
 
-# Enable services
+## Enable services
 RUN systemctl enable \
       puppetserver.service \
       puppet.service \
       journal-console.service
 
 ## Save the important stuff!
-# Note1: /var/cache/r10k needs to match the cachdir value in r10k.conf file
-# Note2: /opt/puppetlabs/puppet/modules is not saved.
-#         Use /etc/puppetlabs/code/modules for global modules
-# TODO Add mcollective and pxp-agent volumes
+## Note1: /var/cache/r10k needs to match the cachdir value in r10k.conf file
+## Note2: /opt/puppetlabs/puppet/modules is not saved.
+##         Use /etc/puppetlabs/code/modules for global modules
+## TODO Add mcollective and pxp-agent volumes
 VOLUME ["/sys/fs/cgroup", \
         "/etc/puppetlabs", \
         "/opt/puppetlabs/puppet/cache", \
