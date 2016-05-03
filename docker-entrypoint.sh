@@ -16,7 +16,7 @@ if [ $1 = "/usr/sbin/init" ]; then
   # Set default r10k repo url.
   sed -i "s@REPOURL@${DEFAULT_R10K_REPO_URL}@" /etc/puppetlabs/r10k/r10k.yaml
 
-  # This section runs before supervisor and is good for initalization or pre-startup tasks
+  ## This script runs before ssytemd init and is good for initalization or pre-startup tasks
   ## Only initalize and setup the environments (via r10k) if server is launching
   ##    for the first time (i.e. new server container). We don't want to unintentionally
   ##    upgrade an environment or break certs on a container restart or upgrade.
@@ -38,6 +38,7 @@ if [ $1 = "/usr/sbin/init" ]; then
     r10k deploy environment --puppetfile -v
   fi
   ## Set puppet.conf settings
+  ## Note: The environment must exist (via r10k above) before the agent can be set to it
   puppet config set server ${PUPPETSERVER} --section main
   puppet config set environment ${PUPPETENV} --section main
   puppet config set runinterval ${RUNINTERVAL} --section agent

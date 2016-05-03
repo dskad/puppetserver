@@ -1,5 +1,4 @@
 FROM centos:7
-
 MAINTAINER Dan Skadra <dskadra@gmail.com>
 
 ## Latest by default, uncomment to pin specific versions or supply with --build-arg PUPPETSERVER_VERSION
@@ -7,9 +6,6 @@ MAINTAINER Dan Skadra <dskadra@gmail.com>
 ARG PUPPETSERVER_VERSION
 # ARG PUPPETSERVER_VERSION="2.3.*"
 # ARG PUPPETSERVER_VERSION="2.3.1"
-
-# TODO possibly make the dynamic at launch time
-ARG R10KCONFIG="r10k.yaml"
 
 ENV PATH="/opt/puppetlabs/puppet/bin:/opt/puppetlabs/server/bin:$PATH" \
     container=docker \
@@ -21,6 +17,7 @@ ENV PATH="/opt/puppetlabs/puppet/bin:/opt/puppetlabs/server/bin:$PATH" \
     RUNINTERVAL=5m \
     WAITFORCERT=15s \
     JAVA_ARGS="-Xms2g -Xmx2g" \
+    # TODO point this to github url when done.
     DEFAULT_R10K_REPO_URL="http://192.168.10.50/dan/control-repo.git"
 
 ## Set locale to en_US.UTF-8 prevent odd puppet errors in containers
@@ -56,7 +53,7 @@ RUN yum -y install \
 
 ## Clean up systemd folders to allow it to run in a container
 ## https://hub.docker.com/_/centos/
-## Note: this needs to run after yup update. If there is an upgrade to systemd/dbus
+## Note: this needs to run after "yum update". If there is an upgrade to systemd/dbus
 ##      these files will get restored
 RUN (cd /lib/systemd/system/sysinit.target.wants/; for i in *; \
   do [ $i == systemd-tmpfiles-setup.service ] || rm -f $i; \
@@ -77,12 +74,12 @@ COPY journal-console.service /usr/lib/systemd/system/journal-console.service
 COPY quiet-console.conf /etc/systemd/system.conf.d/quiet-console.conf
 COPY logback.xml /etc/puppetlabs/puppetserver/logback.xml
 
+# r10k config template. Repo url gets updated in docker-entrypoint on start up from ENV
+COPY r10k.yaml /etc/puppetlabs/r10k/r10k.yaml
+
 ## This configures the pre-startup environment in the container
 COPY docker-entrypoint.sh /docker-entrypoint.sh
 RUN chmod +x /docker-entrypoint.sh
-
-# TODO point this to github url when done.
-COPY r10k.yaml /etc/puppetlabs/r10k/r10k.yaml
 
 ## Update puppet server to use /dev/tcp/localhost/8140 instead of netstat to determine when the
 ##    server is up. Netstat needs container privlidge escalations to run in a container.
@@ -100,9 +97,10 @@ RUN grep -q ExecReload /usr/lib/systemd/system/puppetserver.service || \
       /usr/lib/systemd/system/puppetserver.service
 
 # Enable services
-RUN systemctl enable puppetserver.service \
-  puppet.service \
-  journal-console.service
+RUN systemctl enable \
+      puppetserver.service \
+      puppet.service \
+      journal-console.service
 
 ## Save the important stuff!
 # Note1: /var/cache/r10k needs to match the cachdir value in r10k.conf file
