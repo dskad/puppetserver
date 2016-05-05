@@ -39,7 +39,6 @@ if [ $1 = "/usr/sbin/init" ]; then
   fi
   ## Set puppet.conf settings
   puppet config set runinterval ${RUNINTERVAL} --section agent --environment production
-  puppet config set waitforcert ${WAITFORCERT} --section agent --environment production
   puppet config set server ${PUPPETSERVER} --section main --environment production
   puppet config set trusted_server_facts true --section main --environment production
   if [ -v DNSALTNAMES ]; then
