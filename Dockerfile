@@ -11,11 +11,10 @@ ENV PATH="/opt/puppetlabs/puppet/bin:/opt/puppetlabs/server/bin:$PATH" \
     container=docker \
     LANG=en_US.utf8 \
     TERM=linux \
-    DNSALTNAMES="puppet,puppet.example.com" \
+    DNSALTNAMES \
     PUPPETSERVER=puppet \
     PUPPETENV=bootstrap \
     RUNINTERVAL=5m \
-    WAITFORCERT=15s \
     JAVA_ARGS="-Xms2g -Xmx2g" \
     # TODO point this to github url when done.
     DEFAULT_R10K_REPO_URL="http://192.168.10.50/dan/control-repo.git"

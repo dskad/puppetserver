@@ -31,7 +31,7 @@ if [ $1 = "/usr/sbin/init" ]; then
     # https://tickets.puppetlabs.com/browse/SERVER-1233
     # Note: hostname must be set at container runtime. facter can't properly resolve
     #   the hostname of the container when letting docker generate a random name
-    puppet cert generate $(facter fqdn) --dns_alt_names=${DNSALTNAMES},$(facter hostname) -v
+    puppet cert generate $(facter fqdn) --dns_alt_names=$(facter hostname)${DNSALTNAMES:+,}${DNSALTNAMES} -v
 
     # Run r10k to sync environments with modules
     # This is only run during container setup to prevent unintentional code deployment
@@ -39,12 +39,14 @@ if [ $1 = "/usr/sbin/init" ]; then
   fi
   ## Set puppet.conf settings
   ## Note: The environment must exist (via r10k above) before the agent can be set to it
-  puppet config set server ${PUPPETSERVER} --section main
-  puppet config set environment ${PUPPETENV} --section main
   puppet config set runinterval ${RUNINTERVAL} --section agent
   puppet config set waitforcert ${WAITFORCERT} --section agent
-  puppet config set dns_alt_names ${DNSALTNAMES} --section main
+  puppet config set server ${PUPPETSERVER} --section main
+  puppet config set environment ${PUPPETENV} --section main
   puppet config set trusted_server_facts true --section main
+  if [ -v DNSALTNAMES ]; then
+    puppet config set dns_alt_names ${DNSALTNAMES} --section main
+  fi
 
   # TODO Add config for puppetserver tuning options
 
