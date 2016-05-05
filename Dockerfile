@@ -49,6 +49,8 @@ RUN yum -y install \
       which \
   ## puppetserver depends on which, so we need to install it as a separate command
   && yum -y install puppetserver${PUPPETSERVER_VERSION:+-}${PUPPETSERVER_VERSION} \
+      puppetdb-termini \
+      puppet-client-tools \
   && yum clean all
 
 ## Clean up systemd folders to allow it to run in a container
