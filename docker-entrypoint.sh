@@ -1,7 +1,7 @@
 #!/bin/bash
 ## unoficial "strict mode" http://redsymbol.net/articles/unofficial-bash-strict-mode/
 ## with modification, we want unbound variables to allow extra runtime configs
-set -eo pipefail
+set -xeo pipefail
 IFS=$'\n\t'
 
 if [ $1 = "/usr/sbin/init" ]; then
