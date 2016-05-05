@@ -11,7 +11,7 @@ ENV PATH="/opt/puppetlabs/puppet/bin:/opt/puppetlabs/server/bin:$PATH" \
     container=docker \
     LANG=en_US.utf8 \
     TERM=linux \
-    DNSALTNAMES \
+    # DNSALTNAMES \
     PUPPETSERVER=puppet \
     PUPPETENV=bootstrap \
     RUNINTERVAL=5m \
