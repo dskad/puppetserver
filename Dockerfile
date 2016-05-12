@@ -9,7 +9,7 @@ MAINTAINER Dan Skadra <dskadra@gmail.com>
 ARG PUPPETSERVER_VERSION
 
 
-ENV PATH="/opt/puppetlabs/puppet/bin:/opt/puppetlabs/server/bin:$PATH" \
+ENV PATH="/opt/puppetlabs/bin:/opt/puppetlabs/puppet/bin:/opt/puppetlabs/server/bin:$PATH" \
     container=docker \
     LANG=en_US.utf8 \
     TERM=linux \
@@ -109,7 +109,9 @@ RUN systemctl enable \
 ## Save the important stuff!
 ## Note1: /var/cache/r10k needs to match the cachdir value in r10k.conf file
 ## Note2: /opt/puppetlabs/puppet/modules is not saved.
-##         Use /etc/puppetlabs/code/modules for global modules
+##        Use /etc/puppetlabs/code/modules for global modules
+## Note3: /opt/puppetlabs/facter/facts.d is not saved.
+##        Use /etc/puppetlabs/facter/facts.d for custom global facts
 ## TODO Add mcollective and pxp-agent volumes
 VOLUME ["/sys/fs/cgroup", \
         "/etc/puppetlabs", \
