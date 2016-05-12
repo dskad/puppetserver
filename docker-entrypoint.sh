@@ -13,8 +13,10 @@ if [ $1 = "/usr/sbin/init" ]; then
   # Set JAVA_ARGS for the server
   sed -i "/JAVA_ARGS/ c\\JAVA_ARGS=\"${JAVA_ARGS}\"" /etc/sysconfig/puppetserver
 
-  # Set default r10k repo url.
-  sed -i "s@REPO_URL@${DEFAULT_R10K_REPO_URL}@" /etc/puppetlabs/r10k/r10k.yaml
+  # Set default r10k repo url, if set
+  if [ -v DEFAULT_R10K_REPO_URL ]; then
+    sed -i "s@REPO_URL@${DEFAULT_R10K_REPO_URL}@" /etc/puppetlabs/r10k/r10k.yaml
+  fi
 
   ## This script runs before ssytemd init and is good for initalization or pre-startup tasks
   ## Only initalize and setup the environments (via r10k) if server is launching
@@ -35,7 +37,9 @@ if [ $1 = "/usr/sbin/init" ]; then
 
     # Run r10k to sync environments with modules
     # This is only run during container setup to prevent unintentional code deployment
-    r10k deploy environment --puppetfile -v
+    if [ -v DEFAULT_R10K_REPO_URL ]; then
+      r10k deploy environment --puppetfile -v
+    fi
   fi
   ## Set puppet.conf settings
   puppet config set runinterval ${RUNINTERVAL} --section agent --environment production

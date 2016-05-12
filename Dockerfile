@@ -13,20 +13,28 @@ ENV PATH="/opt/puppetlabs/bin:/opt/puppetlabs/puppet/bin:/opt/puppetlabs/server/
     container=docker \
     LANG=en_US.utf8 \
     TERM=linux \
-    # DNSALTNAMES \
     PUPPETSERVER=puppet \
     PUPPETENV=bootstrap \
     RUNINTERVAL=5m \
-    JAVA_ARGS="-Xms2g -Xmx2g" \
-    DEFAULT_R10K_REPO_URL="http://127.0.0.1/gituser/control-repo.git"
+    JAVA_ARGS="-Xms2g -Xmx2g"
+    ## DEFAULT_R10K_REPO_URL should be set to the location of your default (bootstrap)
+    ##  control repository for a fully functional puppet server setup. It is left blank here
+    ##  so that this image can start up a self contained instance of puppetserver, with out the
+    ##  need to set up a git repository and control repo
+    ##    Example:
+    ##      DEFAULT_R10K_REPO_URL="http://127.0.0.1/gituser/control-repo.git"
+    ##
+    ## DNSALTNAMES can't be empty here, so no default can be provided.
+    ##  use '-e DNSALTNAMES="host,host2,etc"' on the command line to specify dns_alt_names
+    ##  settings on initial container start up
 
 ## Set locale to en_US.UTF-8 prevent odd puppet errors in containers
 RUN localedef -i en_US -c -f UTF-8 -A /usr/share/locale/locale.alias en_US.UTF-8
 
 ## Import repository keys
 RUN rpm --import http://mirror.centos.org/centos/RPM-GPG-KEY-CentOS-7 \
-  --import https://dl.fedoraproject.org/pub/epel/RPM-GPG-KEY-EPEL-7 \
-  --import https://yum.puppetlabs.com/RPM-GPG-KEY-puppetlabs
+        --import https://dl.fedoraproject.org/pub/epel/RPM-GPG-KEY-EPEL-7 \
+        --import https://yum.puppetlabs.com/RPM-GPG-KEY-puppetlabs
 
 ## Add puppet PC1 repo, install puppet server and support tool
 ## Note: Puppetserver creates the user and group puppet and drops the running server to these permissions
@@ -88,23 +96,23 @@ RUN chmod +x /docker-entrypoint.sh
 ## Update puppet server to use /dev/tcp/localhost/8140 instead of netstat to determine when the
 ##    server is up. Netstat needs container privlidge escalations to run in a container.
 RUN sed -i '/netstat -tulpn 2/c\(echo > /dev/tcp/localhost/8140) >/dev/null 2>&1' \
-            /opt/puppetlabs/server/apps/puppetserver/ezbake-functions.sh
+      /opt/puppetlabs/server/apps/puppetserver/ezbake-functions.sh
 
 ## Update puppet service to start after puppetserver is fully up. Preventing strange
 ##    errors in the logs.
 RUN sed -i -e '/^After=/ s/$/ puppetserver.service/' \
-  /usr/lib/systemd/system/puppet.service
+      /usr/lib/systemd/system/puppet.service
 
 ## Enable config reload via systemctl command for puppetserver service
 RUN grep -q ExecReload /usr/lib/systemd/system/puppetserver.service || \
-  sed -i '/^KillMode=/ i\ExecReload=/bin/kill -HUP ${MAINPID}\n' \
+    sed -i '/^KillMode=/ i\ExecReload=/bin/kill -HUP ${MAINPID}\n' \
       /usr/lib/systemd/system/puppetserver.service
 
 ## Enable services
 RUN systemctl enable \
-      puppetserver.service \
-      puppet.service \
-      journal-console.service
+    puppetserver.service \
+    puppet.service \
+    journal-console.service
 
 ## Save the important stuff!
 ## Note1: /var/cache/r10k needs to match the cachdir value in r10k.conf file
