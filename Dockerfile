@@ -14,8 +14,8 @@ ENV PATH="/opt/puppetlabs/bin:/opt/puppetlabs/puppet/bin:/opt/puppetlabs/server/
     LANG=en_US.utf8 \
     TERM=linux \
     PUPPETSERVER=puppet \
-    PUPPETENV=bootstrap \
-    RUNINTERVAL=5m \
+    PUPPETENV=production \
+    RUNINTERVAL=30m \
     JAVA_ARGS="-Xms2g -Xmx2g"
     ## DEFAULT_R10K_REPO_URL should be set to the location of your default (bootstrap)
     ##  control repository for a fully functional puppet server setup. It is left blank here
