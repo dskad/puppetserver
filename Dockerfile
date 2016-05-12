@@ -16,8 +16,7 @@ ENV PATH="/opt/puppetlabs/puppet/bin:/opt/puppetlabs/server/bin:$PATH" \
     PUPPETENV=bootstrap \
     RUNINTERVAL=5m \
     JAVA_ARGS="-Xms2g -Xmx2g" \
-    # TODO point this to github url when done.
-    DEFAULT_R10K_REPO_URL="http://192.168.10.50/dan/control-repo.git"
+    DEFAULT_R10K_REPO_URL="http://127.0.0.1/gituser/control-repo.git"
 
 ## Set locale to en_US.UTF-8 prevent odd puppet errors in containers
 RUN localedef -i en_US -c -f UTF-8 -A /usr/share/locale/locale.alias en_US.UTF-8
