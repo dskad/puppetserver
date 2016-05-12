@@ -14,7 +14,7 @@ if [ $1 = "/usr/sbin/init" ]; then
   sed -i "/JAVA_ARGS/ c\\JAVA_ARGS=\"${JAVA_ARGS}\"" /etc/sysconfig/puppetserver
 
   # Set default r10k repo url.
-  sed -i "s@REPOURL@${DEFAULT_R10K_REPO_URL}@" /etc/puppetlabs/r10k/r10k.yaml
+  sed -i "s@REPO_URL@${DEFAULT_R10K_REPO_URL}@" /etc/puppetlabs/r10k/r10k.yaml
 
   ## This script runs before ssytemd init and is good for initalization or pre-startup tasks
   ## Only initalize and setup the environments (via r10k) if server is launching

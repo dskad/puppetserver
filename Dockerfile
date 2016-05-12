@@ -3,9 +3,11 @@ MAINTAINER Dan Skadra <dskadra@gmail.com>
 
 ## Latest by default, uncomment to pin specific versions or supply with --build-arg PUPPETSERVER_VERSION
 ## Requires docker-engine >= 1.9
+## Examples:
+##  --build-arg PUPPETSERVER_VERSION="2.3.*"
+##  --build-arg PUPPETSERVER_VERSION="2.3.1"
 ARG PUPPETSERVER_VERSION
-# ARG PUPPETSERVER_VERSION="2.3.*"
-# ARG PUPPETSERVER_VERSION="2.3.1"
+
 
 ENV PATH="/opt/puppetlabs/puppet/bin:/opt/puppetlabs/server/bin:$PATH" \
     container=docker \
@@ -45,7 +47,8 @@ RUN yum -y install \
       less \
       logrotate \
       which \
-  ## puppetserver depends on which, so we need to install it as a separate command
+  ## Puppetserver depends on the which command, so we need to install it with a separate yum install
+  ## Preinstalling puppetdb support files here as well
   && yum -y install puppetserver${PUPPETSERVER_VERSION:+-}${PUPPETSERVER_VERSION} \
       puppetdb-termini \
       puppet-client-tools \
@@ -74,7 +77,8 @@ COPY journal-console.service /usr/lib/systemd/system/journal-console.service
 COPY quiet-console.conf /etc/systemd/system.conf.d/quiet-console.conf
 COPY logback.xml /etc/puppetlabs/puppetserver/logback.xml
 
-# r10k config template. Repo url gets updated in docker-entrypoint on start up from ENV
+## r10k config template. Repo url gets updated in docker-entrypoint on start up from ENV
+## If additional repos are needed, configure and refresh with puppet (eg. zack/r10k)
 COPY r10k.yaml /etc/puppetlabs/r10k/r10k.yaml
 
 ## This configures the pre-startup environment in the container
