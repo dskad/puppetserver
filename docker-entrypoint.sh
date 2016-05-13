@@ -1,7 +1,11 @@
 #!/bin/bash
 ## unoficial "strict mode" http://redsymbol.net/articles/unofficial-bash-strict-mode/
 ## with modification, we want unbound variables to allow extra runtime configs
-set -xeo pipefail
+set -eo pipefail
+if [ -v DEBUG ]; then
+  set -x
+fi
+
 IFS=$'\n\t'
 
 if [ $1 = "/usr/sbin/init" ]; then
@@ -35,10 +39,13 @@ if [ $1 = "/usr/sbin/init" ]; then
     #   the hostname of the container when letting docker generate a random name
     puppet cert generate $(facter fqdn) --dns_alt_names=$(facter hostname)${DNSALTNAMES:+,}${DNSALTNAMES} -v
 
-    # Run r10k to sync environments with modules
-    # This is only run during container setup to prevent unintentional code deployment
+    ## Run r10k to sync environments with modules if repo url is set, otherwise create a
+    ##  default node definition
+    ## This is only run during container setup to prevent unintentional code deployment
     if [ -v DEFAULT_R10K_REPO_URL ]; then
       r10k deploy environment --puppetfile -v
+    else
+      echo node default {} > /etc/puppetlabs/code/environments/production/manifests/init.pp
     fi
   fi
   ## Set puppet.conf settings
