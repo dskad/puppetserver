@@ -8,7 +8,6 @@ MAINTAINER Dan Skadra <dskadra@gmail.com>
 ##  --build-arg PUPPETSERVER_VERSION="2.3.1"
 ARG PUPPETSERVER_VERSION
 
-
 ENV PATH="/opt/puppetlabs/bin:/opt/puppetlabs/puppet/bin:/opt/puppetlabs/server/bin:$PATH" \
     container=docker \
     LANG=en_US.utf8 \
@@ -17,17 +16,15 @@ ENV PATH="/opt/puppetlabs/bin:/opt/puppetlabs/puppet/bin:/opt/puppetlabs/server/
     PUPPETENV=production \
     RUNINTERVAL=30m \
     JAVA_ARGS="-Xms2g -Xmx2g" \
-    DNSALTNAMES="localhost,puppet,puppet.example.com"
+    DNSALTNAMES="puppet,puppet.example.com" \
+    PUPPETDB_SERVER="localhost" \
+    PUPPETDB_PORT="8081"
     ## DEFAULT_R10K_REPO_URL should be set to the location of your default (bootstrap)
     ##  control repository for a fully functional puppet server setup. It is left blank here
     ##  so that this image can start up a self contained instance of puppetserver, with out the
     ##  need to set up a git repository and control repo
     ##    Example:
     ##      DEFAULT_R10K_REPO_URL="http://127.0.0.1/gituser/control-repo.git"
-    ##
-    ## DNSALTNAMES can't be empty here, so no default can be provided.
-    ##  use '-e DNSALTNAMES="host,host2,etc"' on the command line to specify dns_alt_names
-    ##  settings on initial container start up
 
 ## Set locale to en_US.UTF-8 prevent odd puppet errors in containers
 RUN localedef -i en_US -c -f UTF-8 -A /usr/share/locale/locale.alias en_US.UTF-8
@@ -79,16 +76,24 @@ RUN (cd /lib/systemd/system/sysinit.target.wants/; for i in *; \
   rm -f /lib/systemd/system/anaconda.target.wants/*;
 
 # Install r10k and tools to manage puppet environments and modules
-RUN gem install r10k generate-puppetfile --no-document
+RUN gem install r10k --no-document
 
 ## Files to send journal logs to stdout for docker logs
 COPY journal-console.service /usr/lib/systemd/system/journal-console.service
 COPY quiet-console.conf /etc/systemd/system.conf.d/quiet-console.conf
 COPY logback.xml /etc/puppetlabs/puppetserver/logback.xml
 
+# Add default site.pp for production environment
+COPY production-site.pp /etc/puppetlabs/code/environments/production/manifests/site.pp
+
 ## r10k config template. Repo url gets updated in docker-entrypoint on start up from ENV
 ## If additional repos are needed, configure and refresh with puppet (eg. zack/r10k)
 COPY r10k.yaml /etc/puppetlabs/r10k/r10k.yaml
+
+## Add custom fact to detect when puppetdb is on line.
+## This will be used in the control repo to connect the server to puppetdb when it is available
+COPY puppetdb_up.sh /opt/puppetlabs/facter/facts.d/puppetdb_up.sh
+RUN chmod +x /opt/puppetlabs/facter/facts.d/puppetdb_up.sh
 
 ## This configures the pre-startup environment in the container
 COPY docker-entrypoint.sh /docker-entrypoint.sh

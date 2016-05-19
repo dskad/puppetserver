@@ -14,9 +14,6 @@ if [ $1 = "/usr/sbin/init" ]; then
   ## https://tickets.puppetlabs.com/browse/SERVER-441
   mkdir -p /run/puppetlabs
 
-  # Set JAVA_ARGS for the server
-  sed -i "/JAVA_ARGS/ c\\JAVA_ARGS=\"${JAVA_ARGS}\"" /etc/sysconfig/puppetserver
-
   # Set default r10k repo url, if set
   if [ -v DEFAULT_R10K_REPO_URL ]; then
     sed -i "s@REPO_URL@${DEFAULT_R10K_REPO_URL}@" /etc/puppetlabs/r10k/r10k.yaml
@@ -45,20 +42,27 @@ if [ $1 = "/usr/sbin/init" ]; then
     if [ -v DEFAULT_R10K_REPO_URL ]; then
       r10k deploy environment --puppetfile -v
     else
-      echo node default {} > /etc/puppetlabs/code/environments/production/manifests/init.pp
+      sed -i "s/MYLOCALHOST/$(facter fqdn)/" /etc/puppetlabs/code/environments/production/manifests/site.pp
     fi
   fi
   ## Set puppet.conf settings
   puppet config set runinterval ${RUNINTERVAL} --section agent --environment production
-  puppet config set server ${PUPPETSERVER} --section main --environment production
+  puppet config set environment ${PUPPETENV} --section main --environment production
   puppet config set trusted_server_facts true --section main --environment production
+
+  if [ ${PUPPETSERVER} == "localhost"]; then
+    puppet config set server $(facter fqdn) --section main --environment production
+  else
+    puppet config set server ${PUPPETSERVER} --section main --environment production
+  fi
+
   if [ -v DNSALTNAMES ]; then
     puppet config set dns_alt_names ${DNSALTNAMES} --section main --environment production
   fi
-  puppet config set environment ${PUPPETENV} --section main --environment production
 
   # TODO Add config for puppetserver tuning options
-
+  # Set JAVA_ARGS for the server
+  sed -i "/JAVA_ARGS/ c\\JAVA_ARGS=\"${JAVA_ARGS}\"" /etc/sysconfig/puppetserver
 fi
 
 ## Pass control on to the command suppled on the CMD line of the Dockerfile
