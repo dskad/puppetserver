@@ -42,7 +42,7 @@ if [ $1 = "/usr/sbin/init" ]; then
     if [ -v DEFAULT_R10K_REPO_URL ]; then
       r10k deploy environment --puppetfile -v
     else
-      sed -i "s/MYLOCALHOST/$(facter fqdn)/" /etc/puppetlabs/code/environments/production/manifests/site.pp
+      sed -i "s/MYLOCALHOST/$(hostname)/" /etc/puppetlabs/code/environments/production/manifests/site.pp
     fi
   fi
   ## Set puppet.conf settings
@@ -50,8 +50,8 @@ if [ $1 = "/usr/sbin/init" ]; then
   puppet config set environment ${PUPPETENV} --section main --environment production
   puppet config set trusted_server_facts true --section main --environment production
 
-  if [ ${PUPPETSERVER} == "localhost"]; then
-    puppet config set server $(facter fqdn) --section main --environment production
+  if [ ${PUPPETSERVER} == "localhost" ]; then
+    puppet config set server $(hostname) --section main --environment production
   else
     puppet config set server ${PUPPETSERVER} --section main --environment production
   fi

@@ -120,6 +120,8 @@ RUN systemctl enable \
     puppet.service \
     journal-console.service
 
+RUN puppet module install puppetlabs-puppetdb
+
 ## Save the important stuff!
 ## Note1: /var/cache/r10k needs to match the cachdir value in r10k.conf file
 ## Note2: /opt/puppetlabs/puppet/modules is not saved.
