@@ -19,12 +19,18 @@ ENV PATH="/opt/puppetlabs/bin:/opt/puppetlabs/puppet/bin:/opt/puppetlabs/server/
     DNSALTNAMES="puppet,puppet.example.com" \
     PUPPETDB_SERVER="localhost" \
     PUPPETDB_PORT="8081"
-    ## DEFAULT_R10K_REPO_URL should be set to the location of your default (bootstrap)
+    ## DEFAULT_R10K_REPO_URL
+    ##  Set to the location of your default (bootstrap)
     ##  control repository for a fully functional puppet server setup. It is left blank here
     ##  so that this image can start up a self contained instance of puppetserver, with out the
     ##  need to set up a git repository and control repo
     ##    Example:
     ##      DEFAULT_R10K_REPO_URL="http://127.0.0.1/gituser/control-repo.git"
+    ##
+    ## R10K_FILE_URL
+    ##  URL of a r10k.yaml file to use at container start up. This overides
+    ##  DEFAULT_R10K_REPO_URL. This allows for the initial configuration of multiple
+    ##  repositories.
 
 ## Set locale to en_US.UTF-8 prevent odd puppet errors in containers
 RUN localedef -i en_US -c -f UTF-8 -A /usr/share/locale/locale.alias en_US.UTF-8

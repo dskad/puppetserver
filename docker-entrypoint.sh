@@ -19,6 +19,10 @@ if [ $1 = "/usr/sbin/init" ]; then
     sed -i "s@REPO_URL@${DEFAULT_R10K_REPO_URL}@" /etc/puppetlabs/r10k/r10k.yaml
   fi
 
+  if [ -v R10K_FILE_URL ]; then
+    curl -Lo /etc/puppetlabs/r10k/r10k.yaml R10K_FILE_URL
+  fi
+
   ## This script runs before ssytemd init and is good for initalization or pre-startup tasks
   ## Only initalize and setup the environments (via r10k) if server is launching
   ##    for the first time (i.e. new server container). We don't want to unintentionally
