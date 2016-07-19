@@ -100,6 +100,7 @@ COPY r10k.yaml /etc/puppetlabs/r10k/r10k.yaml
 RUN mkdir /root/.ssh; \
     chmod 700 /root/.ssh
 COPY ssh-config /root/.ssh/config
+RUN chmod 600 /root/.ssh/config
 
 ## Add custom fact to detect when puppetdb is on line.
 ## This will be used in the control repo to connect the server to puppetdb when it is available

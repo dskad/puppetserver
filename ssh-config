@@ -1,2 +1,3 @@
 Host *
   IdentityFile /etc/puppetlabs/r10k/ssh/id_rsa
+  StrictHostKeyChecking no
