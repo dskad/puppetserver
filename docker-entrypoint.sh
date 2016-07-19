@@ -26,6 +26,8 @@ if [ $1 = "/usr/sbin/init" ]; then
 
   # Generate SSH key pair for R10k if it doesn't exist
   if [[ ! -f  /etc/puppetlabs/r10k/ssh/id_rsa ]]; then
+    mkdir -p /etc/puppetlabs/r10k/ssh
+    # TODO fix permissions and ownership
     ssh-keygen -b 4096 -f /etc/puppetlabs/r10k/ssh/id_rsa -t rsa -N ""
   fi
 
