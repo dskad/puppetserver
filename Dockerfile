@@ -96,6 +96,11 @@ COPY production-site.pp /etc/puppetlabs/code/environments/production/manifests/s
 ## If additional repos are needed, configure and refresh with puppet (eg. zack/r10k)
 COPY r10k.yaml /etc/puppetlabs/r10k/r10k.yaml
 
+## Setup ssh to us identification files in the r10k config directory
+RUN mkdir /root/.ssh; \
+    chmod 700 /root/.ssh
+COPY ssh-config /root/.ssh/config
+
 ## Add custom fact to detect when puppetdb is on line.
 ## This will be used in the control repo to connect the server to puppetdb when it is available
 COPY puppetdb_up.sh /opt/puppetlabs/facter/facts.d/puppetdb_up.sh

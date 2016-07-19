@@ -15,12 +15,18 @@ if [ $1 = "/usr/sbin/init" ]; then
   mkdir -p /run/puppetlabs
 
   # Set default r10k repo url, if set
+  # TODO Set DEFAULT_R10K_REPO_URL to a local directory with a default repo in it
   if [ -v DEFAULT_R10K_REPO_URL ]; then
     sed -i "s@REPO_URL@${DEFAULT_R10K_REPO_URL}@" /etc/puppetlabs/r10k/r10k.yaml
   fi
 
   if [ -v R10K_FILE_URL ]; then
     curl -Lo /etc/puppetlabs/r10k/r10k.yaml R10K_FILE_URL
+  fi
+
+  # Generate SSH key pair for R10k if it doesn't exist
+  if [[ ! -f  /etc/puppetlabs/r10k/ssh/id_rsa ]]; then
+    ssh-keygen -b 4096 -f /etc/puppetlabs/r10k/ssh/id_rsa -t rsa -N ""
   fi
 
   ## This script runs before ssytemd init and is good for initalization or pre-startup tasks
