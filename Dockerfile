@@ -66,28 +66,8 @@ RUN yum -y install \
       puppet-client-tools \
   && yum clean all
 
-## Clean up systemd folders to allow it to run in a container
-## https://hub.docker.com/_/centos/
-## Note: this needs to run after "yum update". If there is an upgrade to systemd/dbus
-##      these files will get restored
-RUN (cd /lib/systemd/system/sysinit.target.wants/; for i in *; \
-  do [ $i == systemd-tmpfiles-setup.service ] || rm -f $i; \
-  done); \
-  rm -f /lib/systemd/system/multi-user.target.wants/*;\
-  rm -f /etc/systemd/system/*.wants/*;\
-  rm -f /lib/systemd/system/local-fs.target.wants/*; \
-  rm -f /lib/systemd/system/sockets.target.wants/*udev*; \
-  rm -f /lib/systemd/system/sockets.target.wants/*initctl*; \
-  rm -f /lib/systemd/system/basic.target.wants/*;\
-  rm -f /lib/systemd/system/anaconda.target.wants/*;
-
 # Install r10k and tools to manage puppet environments and modules
 RUN gem install r10k --no-document
-
-## Files to send journal logs to stdout for docker logs
-COPY journal-console.service /usr/lib/systemd/system/journal-console.service
-COPY quiet-console.conf /etc/systemd/system.conf.d/quiet-console.conf
-COPY logback.xml /etc/puppetlabs/puppetserver/logback.xml
 
 # Add default site.pp for production environment
 COPY production-site.pp /etc/puppetlabs/code/environments/production/manifests/site.pp
@@ -116,22 +96,6 @@ RUN chmod +x /docker-entrypoint.sh
 RUN sed -i '/netstat -tulpn 2/c\(echo > /dev/tcp/localhost/8140) >/dev/null 2>&1' \
       /opt/puppetlabs/server/apps/puppetserver/ezbake-functions.sh
 
-## Update puppet service to start after puppetserver is fully up. Preventing strange
-##    errors in the logs.
-RUN sed -i -e '/^After=/ s/$/ puppetserver.service/' \
-      /usr/lib/systemd/system/puppet.service
-
-## Enable config reload via systemctl command for puppetserver service
-RUN grep -q ExecReload /usr/lib/systemd/system/puppetserver.service || \
-    sed -i '/^KillMode=/ i\ExecReload=/bin/kill -HUP ${MAINPID}\n' \
-      /usr/lib/systemd/system/puppetserver.service
-
-## Enable services
-RUN systemctl enable \
-    puppetserver.service \
-    puppet.service \
-    journal-console.service
-
 RUN puppet module install puppetlabs-puppetdb
 
 ## Save the important stuff!
@@ -141,8 +105,7 @@ RUN puppet module install puppetlabs-puppetdb
 ## Note3: /opt/puppetlabs/facter/facts.d is not saved.
 ##        Use /etc/puppetlabs/facter/facts.d for custom global facts
 ## TODO Add mcollective and pxp-agent volumes
-VOLUME ["/sys/fs/cgroup", \
-        "/etc/puppetlabs", \
+VOLUME ["/etc/puppetlabs", \
         "/opt/puppetlabs/puppet/cache", \
         "/opt/puppetlabs/server/data", \
         "/var/log/puppetlabs", \
@@ -151,4 +114,4 @@ VOLUME ["/sys/fs/cgroup", \
 EXPOSE 8140
 
 ENTRYPOINT ["/docker-entrypoint.sh"]
-CMD ["/usr/sbin/init"]
+CMD ["puppetserver", "foreground"]
