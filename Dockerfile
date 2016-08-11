@@ -91,11 +91,6 @@ RUN chmod +x /opt/puppetlabs/facter/facts.d/puppetdb_up.sh
 COPY docker-entrypoint.sh /docker-entrypoint.sh
 RUN chmod +x /docker-entrypoint.sh
 
-## Update puppet server to use /dev/tcp/localhost/8140 instead of netstat to determine when the
-##    server is up. Netstat needs container privlidge escalations to run in a container.
-RUN sed -i '/netstat -tulpn 2/c\(echo > /dev/tcp/localhost/8140) >/dev/null 2>&1' \
-      /opt/puppetlabs/server/apps/puppetserver/ezbake-functions.sh
-
 RUN puppet module install puppetlabs-puppetdb
 
 ## Save the important stuff!
