@@ -8,7 +8,7 @@ fi
 
 IFS=$'\n\t'
 
-if [ $1 = "/usr/sbin/init" ]; then
+if [ $1 = "puppetserver" ]; then
   ## Create /var/run/puppetlabs directory as this will go missing since we are mounting tmpfs here
   ## Puppetserver startup doesn't recreate this directory
   ## https://tickets.puppetlabs.com/browse/SERVER-441
