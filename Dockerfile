@@ -109,4 +109,6 @@ VOLUME ["/etc/puppetlabs", \
 EXPOSE 8140
 
 ENTRYPOINT ["/docker-entrypoint.sh"]
+
+USER puppet
 CMD ["puppetserver", "foreground"]

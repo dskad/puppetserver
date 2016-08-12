@@ -12,7 +12,7 @@ if [ $1 = "puppetserver" ]; then
   ## Create /var/run/puppetlabs directory as this will go missing since we are mounting tmpfs here
   ## Puppetserver startup doesn't recreate this directory
   ## https://tickets.puppetlabs.com/browse/SERVER-441
-  mkdir -p /run/puppetlabs
+  # mkdir -p /run/puppetlabs
 
   # Set default r10k repo url, if set
   # TODO Set DEFAULT_R10K_REPO_URL to a local directory with a default repo in it
