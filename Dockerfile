@@ -70,7 +70,7 @@ RUN yum -y install \
 RUN gem install r10k --no-document
 
 # Add default site.pp for production environment
-COPY production-site.pp /etc/puppetlabs/code/environments/production/manifests/site.pp
+# COPY production-site.pp /etc/puppetlabs/code/environments/production/manifests/site.pp
 
 ## r10k config template. Repo url gets updated in docker-entrypoint on start up from ENV
 ## If additional repos are needed, configure and refresh with puppet (eg. zack/r10k)

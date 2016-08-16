@@ -12,12 +12,15 @@ if [ $1 = "puppetserver" ]; then
   ## Create /var/run/puppetlabs directory as this will go missing since we are mounting tmpfs here
   ## Puppetserver startup doesn't recreate this directory
   ## https://tickets.puppetlabs.com/browse/SERVER-441
-  # mkdir -p /run/puppetlabs
 
   # Set default r10k repo url, if set
   # TODO Set DEFAULT_R10K_REPO_URL to a local directory with a default repo in it
   if [ -v DEFAULT_R10K_REPO_URL ]; then
     sed -i "s@REPO_URL@${DEFAULT_R10K_REPO_URL}@" /etc/puppetlabs/r10k/r10k.yaml
+    # r10k deploy environment --puppetfile -v
+  else
+    # TODO Use tags instead of the hostname
+    sed -i "s/MYLOCALHOST/$(hostname)/" /etc/puppetlabs/code/environments/production/manifests/site.pp
   fi
 
   if [ -v R10K_FILE_URL ]; then
@@ -29,6 +32,8 @@ if [ $1 = "puppetserver" ]; then
     mkdir -p /etc/puppetlabs/r10k/ssh
     # TODO fix permissions and ownership
     ssh-keygen -b 4096 -f /etc/puppetlabs/r10k/ssh/id_rsa -t rsa -N ""
+    # chmod 600 /etc/puppetlabs/r10k/ssh/id_rsa
+    # chmod 600 /etc/puppetlabs/r10k/ssh/id_rsa.key
   fi
 
   ## This script runs before ssytemd init and is good for initalization or pre-startup tasks
@@ -47,19 +52,11 @@ if [ $1 = "puppetserver" ]; then
     # Note: hostname must be set at container runtime. facter can't properly resolve
     #   the hostname of the container when letting docker generate a random name
     puppet cert generate $(facter fqdn) --dns_alt_names=$(facter hostname)${DNSALTNAMES:+,}${DNSALTNAMES} -v
-
-    ## Run r10k to sync environments with modules if repo url is set, otherwise create a
-    ##  default node definition
-    ## This is only run during container setup to prevent unintentional code deployment
-    if [ -v DEFAULT_R10K_REPO_URL ]; then
-      r10k deploy environment --puppetfile -v
-    else
-      sed -i "s/MYLOCALHOST/$(hostname)/" /etc/puppetlabs/code/environments/production/manifests/site.pp
-    fi
   fi
+
   ## Set puppet.conf settings
-  puppet config set runinterval ${RUNINTERVAL} --section agent --environment production
-  puppet config set environment ${PUPPETENV} --section main --environment production
+  # puppet config set runinterval ${RUNINTERVAL} --section agent --environment production
+  # puppet config set environment ${PUPPETENV} --section main --environment production
   puppet config set trusted_server_facts true --section main --environment production
 
   # if [ ${PUPPETSERVER} == "localhost" ]; then
@@ -74,7 +71,7 @@ if [ $1 = "puppetserver" ]; then
 
   # TODO Add config for puppetserver tuning options
   # Set JAVA_ARGS for the server
-  sed -i "/JAVA_ARGS/ c\\JAVA_ARGS=\"${JAVA_ARGS}\"" /etc/sysconfig/puppetserver
+  # sed -i "/JAVA_ARGS/ c\\JAVA_ARGS=\"${JAVA_ARGS}\"" /etc/sysconfig/puppetserver
 fi
 
 ## Pass control on to the command suppled on the CMD line of the Dockerfile
