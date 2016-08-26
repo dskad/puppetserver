@@ -1,36 +1,29 @@
 FROM centos:7
 MAINTAINER Dan Skadra <dskadra@gmail.com>
 
-## Latest by default, uncomment to pin specific versions or supply with --build-arg PUPPETSERVER_VERSION
-## Requires docker-engine >= 1.9
-## Examples:
-##  --build-arg PUPPETSERVER_VERSION="2.3.*"
-##  --build-arg PUPPETSERVER_VERSION="2.3.1"
-ARG PUPPETSERVER_VERSION
-
 ENV PATH="/opt/puppetlabs/bin:/opt/puppetlabs/puppet/bin:/opt/puppetlabs/server/bin:$PATH" \
-    container=docker \
-    LANG=en_US.utf8 \
-    TERM=linux \
-    # PUPPETSERVER=localhost \
-    PUPPETENV=production \
-    RUNINTERVAL=30m \
-    JAVA_ARGS="-Xms2g -Xmx2g" \
-    DNSALTNAMES="puppet,puppet.example.com" \
-    PUPPETDB_SERVER="localhost" \
-    PUPPETDB_PORT="8081"
-    ## DEFAULT_R10K_REPO_URL
-    ##  Set to the location of your default (bootstrap)
-    ##  control repository for a fully functional puppet server setup. It is left blank here
-    ##  so that this image can start up a self contained instance of puppetserver, with out the
-    ##  need to set up a git repository and control repo
-    ##    Example:
-    ##      DEFAULT_R10K_REPO_URL="http://127.0.0.1/gituser/control-repo.git"
-    ##
-    ## R10K_FILE_URL
-    ##  URL of a r10k.yaml file to use at container start up. This overides
-    ##  DEFAULT_R10K_REPO_URL. This allows for the initial configuration of multiple
-    ##  repositories.
+container=docker \
+LANG=en_US.utf8 \
+TERM=linux \
+# PUPPETSERVER=localhost \
+PUPPETENV=production \
+RUNINTERVAL=30m \
+JAVA_ARGS="-Xms2g -Xmx2g" \
+DNSALTNAMES="puppet,puppet.example.com" \
+PUPPETDB_SERVER="localhost" \
+PUPPETDB_PORT="8081"
+## DEFAULT_R10K_REPO_URL
+##  Set to the location of your default (bootstrap)
+##  control repository for a fully functional puppet server setup. It is left blank here
+##  so that this image can start up a self contained instance of puppetserver, with out the
+##  need to set up a git repository and control repo
+##    Example:
+##      DEFAULT_R10K_REPO_URL="http://127.0.0.1/gituser/control-repo.git"
+##
+## R10K_FILE_URL
+##  URL of a r10k.yaml file to use at container start up. This overides
+##  DEFAULT_R10K_REPO_URL. This allows for the initial configuration of multiple
+##  repositories.
 
 ## Set locale to en_US.UTF-8 prevent odd puppet errors in containers
 RUN localedef -i en_US -c -f UTF-8 -A /usr/share/locale/locale.alias en_US.UTF-8
@@ -39,6 +32,13 @@ RUN localedef -i en_US -c -f UTF-8 -A /usr/share/locale/locale.alias en_US.UTF-8
 RUN rpm --import http://mirror.centos.org/centos/RPM-GPG-KEY-CentOS-7 \
         --import https://dl.fedoraproject.org/pub/epel/RPM-GPG-KEY-EPEL-7 \
         --import https://yum.puppetlabs.com/RPM-GPG-KEY-puppetlabs
+
+## Latest by default, uncomment to pin specific versions or supply with --build-arg PUPPETSERVER_VERSION
+## Requires docker-engine >= 1.9
+## Examples:
+##  --build-arg PUPPETSERVER_VERSION="2.3.*"
+##  --build-arg PUPPETSERVER_VERSION="2.3.1"
+ARG PUPPETSERVER_VERSION
 
 ## Add puppet PC1 repo, install puppet server and support tool
 ## Note: Puppetserver creates the user and group puppet and drops the running server to these permissions
@@ -91,6 +91,7 @@ RUN chmod +x /opt/puppetlabs/facter/facts.d/puppetdb_up.sh
 COPY docker-entrypoint.sh /docker-entrypoint.sh
 RUN chmod +x /docker-entrypoint.sh
 
+# TODO This should go in puppetfile 
 RUN puppet module install puppetlabs-puppetdb
 
 ## Save the important stuff!
