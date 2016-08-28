@@ -1,11 +1,7 @@
 FROM centos:7
 MAINTAINER Dan Skadra <dskadra@gmail.com>
 
-ENV PATH="/opt/puppetlabs/bin:/opt/puppetlabs/puppet/bin:/opt/puppetlabs/server/bin:$PATH" \
-container=docker \
-LANG=en_US.utf8 \
-TERM=linux \
-# PUPPETSERVER=localhost \
+ENV PATH="/opt/puppetlabs/server/bin:$PATH" \
 PUPPETENV=production \
 RUNINTERVAL=30m \
 JAVA_ARGS="-Xms2g -Xmx2g" \
@@ -26,19 +22,13 @@ PUPPETDB_PORT="8081"
 ##  repositories.
 
 ## Set locale to en_US.UTF-8 prevent odd puppet errors in containers
-RUN localedef -i en_US -c -f UTF-8 -A /usr/share/locale/locale.alias en_US.UTF-8
-
-## Import repository keys
-RUN rpm --import http://mirror.centos.org/centos/RPM-GPG-KEY-CentOS-7 \
-        --import https://dl.fedoraproject.org/pub/epel/RPM-GPG-KEY-EPEL-7 \
-        --import https://yum.puppetlabs.com/RPM-GPG-KEY-puppetlabs
 
 ## Latest by default, uncomment to pin specific versions or supply with --build-arg PUPPETSERVER_VERSION
 ## Requires docker-engine >= 1.9
 ## Examples:
 ##  --build-arg PUPPETSERVER_VERSION="2.3.*"
 ##  --build-arg PUPPETSERVER_VERSION="2.3.1"
-ARG PUPPETSERVER_VERSION
+# ARG PUPPETSERVER_VERSION
 
 ## Add puppet PC1 repo, install puppet server and support tool
 ## Note: Puppetserver creates the user and group puppet and drops the running server to these permissions
@@ -48,51 +38,53 @@ ARG PUPPETSERVER_VERSION
 ##          /opt/puppetlabs/server/data
 ##          /var/log/puppetlabs/puppetserver (if it exists)
 ##          /etc/puppetlabs/puppet/ssl
-RUN yum -y install \
-      https://yum.puppetlabs.com/puppetlabs-release-pc1-el-7.noarch.rpm \
-      epel-release \
-  && yum -y update \
-  && yum -y install \
-      bash-completion \
-      ca-certificates \
-      git \
-      less \
-      logrotate \
-      which \
-  ## Puppetserver depends on the which command, so we need to install it with a separate yum install
-  ## Preinstalling puppetdb support files here as well
-  && yum -y install puppetserver${PUPPETSERVER_VERSION:+-}${PUPPETSERVER_VERSION} \
-      puppetdb-termini \
-      puppet-client-tools \
-  && yum clean all
+# RUN yum -y install \
+#       https://yum.puppetlabs.com/puppetlabs-release-pc1-el-7.noarch.rpm \
+#       epel-release \
+#   && yum -y update \
+#   && yum -y install \
+#       bash-completion \
+#       ca-certificates \
+#       git \
+#       less \
+#       logrotate \
+#       which \
+#   ## Puppetserver depends on the which command, so we need to install it with a separate yum install
+#   ## Preinstalling puppetdb support files here as well
+#   && yum -y install puppetserver${PUPPETSERVER_VERSION:+-}${PUPPETSERVER_VERSION} \
+#       puppetdb-termini \
+#       puppet-client-tools \
+#   && yum clean all
 
 # Install r10k and tools to manage puppet environments and modules
-RUN gem install r10k --no-document
-
-# Add default site.pp for production environment
-# COPY production-site.pp /etc/puppetlabs/code/environments/production/manifests/site.pp
+# RUN gem install r10k --no-document
+COPY build_puppetserver.pp /build/build_puppetserver.pp
+RUN puppet apply /build/build_puppetserver.pp -v
 
 ## r10k config template. Repo url gets updated in docker-entrypoint on start up from ENV
 ## If additional repos are needed, configure and refresh with puppet (eg. zack/r10k)
 COPY r10k.yaml /etc/puppetlabs/r10k/r10k.yaml
 
 ## Setup ssh to us identification files in the r10k config directory
-RUN mkdir /root/.ssh; \
-    chmod 700 /root/.ssh
-COPY ssh-config /root/.ssh/config
-RUN chmod 600 /root/.ssh/config
+# COPY ssh-config /root/.ssh/config
+# RUN chmod 700 /root/.ssh \
+#   && chmod 600 /root/.ssh/config \
 
 ## Add custom fact to detect when puppetdb is on line.
 ## This will be used in the control repo to connect the server to puppetdb when it is available
 COPY puppetdb_up.sh /opt/puppetlabs/facter/facts.d/puppetdb_up.sh
-RUN chmod +x /opt/puppetlabs/facter/facts.d/puppetdb_up.sh
 
 ## This configures the pre-startup environment in the container
 COPY docker-entrypoint.sh /docker-entrypoint.sh
-RUN chmod +x /docker-entrypoint.sh
 
-# TODO This should go in puppetfile 
-RUN puppet module install puppetlabs-puppetdb
+RUN chmod +x /docker-entrypoint.sh \
+  && chmod +x /opt/puppetlabs/facter/facts.d/puppetdb_up.sh
+
+# Add default site.pp for puppet environment
+# COPY site.pp /etc/puppetlabs/code/environments/puppet/manifests/site.pp
+
+# TODO This should go in puppetfile
+# RUN puppet module install puppetlabs-puppetdb
 
 ## Save the important stuff!
 ## Note1: /var/cache/r10k needs to match the cachdir value in r10k.conf file
