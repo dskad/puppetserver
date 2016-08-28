@@ -1,4 +1,4 @@
-FROM centos:7
+FROM puppetagent
 MAINTAINER Dan Skadra <dskadra@gmail.com>
 
 ENV PATH="/opt/puppetlabs/server/bin:$PATH" \
