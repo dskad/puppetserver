@@ -4,7 +4,7 @@ MAINTAINER Dan Skadra <dskadra@gmail.com>
 ENV PATH="/opt/puppetlabs/server/bin:$PATH" \
 PUPPETENV=production \
 RUNINTERVAL=30m \
-JAVA_ARGS="-Xms2g -Xmx2g" \
+PUPPETSERVER_JAVA_ARGS="-Xms2g -Xmx2g" \
 DNSALTNAMES="puppet,puppet.example.com" \
 PUPPETDB_SERVER="localhost" \
 PUPPETDB_PORT="8081"
@@ -78,7 +78,15 @@ COPY puppetdb_up.sh /opt/puppetlabs/facter/facts.d/puppetdb_up.sh
 COPY docker-entrypoint.sh /docker-entrypoint.sh
 
 RUN chmod +x /docker-entrypoint.sh \
-  && chmod +x /opt/puppetlabs/facter/facts.d/puppetdb_up.sh
+  && chmod +x /opt/puppetlabs/facter/facts.d/puppetdb_up.sh \
+
+  # Set JAVA_ARGS from the envir variable PUPPETSERVER_JAVA_ARGS
+  && sed -i "s/\"-Xms2g -Xmx2g -XX:MaxPermSize=256m\"/\$PUPPETSERVER_JAVA_ARGS/" \
+    /etc/sysconfig/puppetserver \
+
+  # Fix forground command so it can listen for signals from docker
+  && sed -i "s/runuser \"/exec runuser \"/" \
+    /opt/puppetlabs/server/apps/puppetserver/cli/apps/foreground
 
 # Add default site.pp for puppet environment
 # COPY site.pp /etc/puppetlabs/code/environments/puppet/manifests/site.pp
