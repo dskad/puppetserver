@@ -6,7 +6,7 @@ if [ -v DEBUG ]; then
   set -x
 fi
 
-IFS=$'\n\t'
+# IFS=$'\n\t'
 
 if [ $1 = "puppetserver" ]; then
   ## Create /var/run/puppetlabs directory as this will go missing since we are mounting tmpfs here
@@ -29,11 +29,7 @@ if [ $1 = "puppetserver" ]; then
 
   # Generate SSH key pair for R10k if it doesn't exist
   if [[ ! -f  /etc/puppetlabs/r10k/ssh/id_rsa ]]; then
-    mkdir -p /etc/puppetlabs/r10k/ssh
-    # TODO fix permissions and ownership
     ssh-keygen -b 4096 -f /etc/puppetlabs/r10k/ssh/id_rsa -t rsa -N ""
-    # chmod 600 /etc/puppetlabs/r10k/ssh/id_rsa
-    # chmod 600 /etc/puppetlabs/r10k/ssh/id_rsa.key
   fi
 
   ## This script runs before ssytemd init and is good for initalization or pre-startup tasks

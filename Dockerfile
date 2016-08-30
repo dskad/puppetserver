@@ -59,8 +59,7 @@ PUPPETDB_PORT="8081"
 # Install r10k and tools to manage puppet environments and modules
 # RUN gem install r10k --no-document
 COPY build_puppetserver.pp /build/build_puppetserver.pp
-RUN puppet apply /build/build_puppetserver.pp -v \
-  && yum clean all 
+RUN puppet apply /build/build_puppetserver.pp -v
 
 ## r10k config template. Repo url gets updated in docker-entrypoint on start up from ENV
 ## If additional repos are needed, configure and refresh with puppet (eg. zack/r10k)

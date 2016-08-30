@@ -35,3 +35,10 @@ file { '/root/.ssh/config':
   mode    => '0600',
   content => "Host *\n\tIdentityFile /etc/puppetlabs/r10k/ssh/id_rsa\n\tStrictHostKeyChecking no",
 }
+
+exec {'clean_yum':
+  command => 'yum clean all',
+  path    => ['/bin', '/usr/bin']
+}
+
+Package <| |> -> Exec['clean_yum']
