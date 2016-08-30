@@ -25,6 +25,12 @@ $module_puppetdb = 'puppetlabs-puppetdb'
     path    => ['/bin', '/opt/puppetlabs/bin']
   }
 
+file {'etc/puppetlabs/r10k/ssh':
+  ensure  => directory,
+  mode    => '0700',
+  require => Package['r10k'],
+}
+
 file { '/root/.ssh':
   ensure => directory,
   mode   => '0700',
