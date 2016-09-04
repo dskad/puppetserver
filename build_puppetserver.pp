@@ -18,23 +18,17 @@ package {'r10k':
   install_options => '--no-document',
 }
 
-$module_puppetdb = 'puppetlabs-puppetdb'
-  exec { 'puppet_module_puppetdb':
-    command => "puppet module install ${module_puppetdb}",
-    unless  => "puppet module list | grep ${module_puppetdb}",
-    path    => ['/bin', '/opt/puppetlabs/bin']
-  }
+exec { 'puppet_module_puppetdb':
+  command => 'puppet module install puppetlabs-puppetdb',
+  unless  => 'puppet module list | grep puppetlabs-puppetdb',
+  path    => ['/bin', '/opt/puppetlabs/bin']
+}
 
 file {'/etc/puppetlabs/r10k':
   ensure => directory,
 }
 
-file {'/etc/puppetlabs/r10k/ssh':
-  ensure => directory,
-  mode   => '0700',
-}
-
-file { '/root/.ssh':
+file {['/etc/puppetlabs/r10k/ssh', '/root/.ssh']:
   ensure => directory,
   mode   => '0700',
 }
@@ -42,7 +36,11 @@ file { '/root/.ssh':
 file { '/root/.ssh/config':
   ensure  => present,
   mode    => '0600',
-  content => "Host *\n\tIdentityFile /etc/puppetlabs/r10k/ssh/id_rsa\n\tStrictHostKeyChecking no",
+  content => 'Host *\n' \
+              '  IdentityFile /etc/puppetlabs/r10k/ssh/id_rsa\n' \
+              '  StrictHostKeyChecking no\n' \
+              '  UserKnownHostsFile /etc/puppetlabs/r10k/ssh/known_hosts' \
+              '  User git',
 }
 
 exec {'clean_yum':
