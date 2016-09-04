@@ -36,11 +36,11 @@ file {['/etc/puppetlabs/r10k/ssh', '/root/.ssh']:
 file { '/root/.ssh/config':
   ensure  => present,
   mode    => '0600',
-  content => 'Host *\n' \
-              '  IdentityFile /etc/puppetlabs/r10k/ssh/id_rsa\n' \
-              '  StrictHostKeyChecking no\n' \
-              '  UserKnownHostsFile /etc/puppetlabs/r10k/ssh/known_hosts' \
-              '  User git',
+  content => "Host *\n" \
+              "  IdentityFile /etc/puppetlabs/r10k/ssh/id_rsa\n" \
+              "  StrictHostKeyChecking no\n" \
+              "  UserKnownHostsFile /etc/puppetlabs/r10k/ssh/known_hosts" \
+              "  User git",
 }
 
 exec {'clean_yum':
