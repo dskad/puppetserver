@@ -38,7 +38,7 @@ file { '/root/.ssh/config':
   mode    => '0600',
   content => @(EOT)
                 Host *
-                  IdenttyFile /etc/puppetlabs/r10k/ssh/id_rsa
+                  IdentityFile /etc/puppetlabs/r10k/ssh/id_rsa
                   StrictHostKeyChecking no
                   UserKnownHostsFile /etc/puppetlabs/r10k/ssh/known_hosts
                   User git
