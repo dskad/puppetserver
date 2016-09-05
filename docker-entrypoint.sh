@@ -16,7 +16,7 @@ if [ $1 = "puppetserver" ]; then
   # Set default r10k repo url, if set
   # TODO Set DEFAULT_R10K_REPO_URL to a local directory with a default repo in it
   if [ -v DEFAULT_R10K_REPO_URL ]; then
-    sed -i "s@REPO_URL@${DEFAULT_R10K_REPO_URL}@" /etc/puppetlabs/r10k/r10k.yaml
+    sed -i "s|REPO_URL|${DEFAULT_R10K_REPO_URL}|" /etc/puppetlabs/r10k/r10k.yaml
     # r10k deploy environment --puppetfile -v
   # else
     # TODO Use tags instead of the hostname
