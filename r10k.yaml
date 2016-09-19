@@ -20,7 +20,7 @@ sources:
 
     # The 'remote' setting determines the location of the VCS repository used
     # for creating environments.
-    remote: 'REPO_URL'
+    remote: 'DEFAULT_ENV_REPO_URL'
 
     # The 'basedir' setting specifies where environments will be created for
     # this source. This setting should match the Puppet 'environmentpath'

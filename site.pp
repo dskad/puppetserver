@@ -41,33 +41,33 @@ node 'puppetdb.example.com' {
 }
 
 #########
-# node 'puppetexplorer.example.com' {
-#   puppetdb_servers => [['puppetdb','/api']],
-#   vhost_options    => {
-#     rewrites => [
-#       {
-#         rewrite_rule => ['^/api/metrics/v1/mbeans/puppetlabs.puppetdb.query.population:type=default,name=(.*)$  https://%{HTTP_HOST}/api/metrics/v1/mbeans/puppetlabs.puppetdb.population:name=$1 [R=301,L]']
-#       }
-#     ]
-#   }
-# }
-#
-# ##########
-# node 'puppetboard.example.com' {
-#   # Configure Apache on this server
-#   class { 'apache': }
-#   class { 'apache::mod::wsgi':
-#   wsgi_socket_prefix => '/var/run/wsgi',
-#   }
-#   # Configure Puppetboard
-#   class { 'puppetboard':
-#     manage_git        => 'latest',
-#     manage_virtualenv => 'latest',
-#     puppetdb_host     => 'puppetdb',
-#     # listen            => 'public',
-#   }
-#   class { 'puppetboard::apache::vhost':
-#     vhost_name => 'puppetboard.example.com',
-#     port       => 80,
-#   }
-# }
+node 'puppetexplorer.example.com' {
+  puppetdb_servers => [['puppetdb','/api']],
+  vhost_options    => {
+    rewrites => [
+      {
+        rewrite_rule => ['^/api/metrics/v1/mbeans/puppetlabs.puppetdb.query.population:type=default,name=(.*)$  https://%{HTTP_HOST}/api/metrics/v1/mbeans/puppetlabs.puppetdb.population:name=$1 [R=301,L]']
+      }
+    ]
+  }
+}
+
+##########
+node 'puppetboard.example.com' {
+  # Configure Apache on this server
+  class { 'apache': }
+  class { 'apache::mod::wsgi':
+  wsgi_socket_prefix => '/var/run/wsgi',
+  }
+  # Configure Puppetboard
+  class { 'puppetboard':
+    manage_git        => 'latest',
+    manage_virtualenv => 'latest',
+    puppetdb_host     => 'puppetdb',
+    # listen            => 'public',
+  }
+  class { 'puppetboard::apache::vhost':
+    vhost_name => 'puppetboard.example.com',
+    port       => 80,
+  }
+}
