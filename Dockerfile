@@ -30,8 +30,8 @@ DEFAULT_ENV_REPO_URL="https://gitlab.example.com/dan/control.git"
 ##  --build-arg PUPPETSERVER_VERSION="2.3.1"
 # ARG PUPPETSERVER_VERSION
 
-COPY build_puppetserver.pp /build/build_puppetserver.pp
-RUN puppet apply /build/build_puppetserver.pp -v
+COPY bootstrap_server.pp /build/bootstrap_server.pp
+RUN puppet apply /build/bootstrap_server.pp -v
 
 ## r10k config template. Repo url gets updated in docker-entrypoint on start up from ENV
 ## If additional repos are needed, configure and refresh with puppet (eg. zack/r10k)

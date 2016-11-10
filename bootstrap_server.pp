@@ -1,30 +1,44 @@
-$server_packages = [
-    'bash-completion',
-    'ca-certificates',
-    'git',
-    'less',
-    'logrotate',
-    'which',
-    'puppetserver',
-    'puppetdb-termini',
-    'puppet-client-tools'
-    ]
+# This class will build a puppetserver image on the base puppet agent image
+$gem_packages = [
+  'r10k'
+]
 
-package {$server_packages: ensure => 'installed' }
+$yum_packages = [
+  'bash-completion',
+  'ca-certificates',
+  'git',
+  'less',
+  'logrotate',
+  'which',
+  'puppetserver',
+  'puppetdb-termini',
+  'puppet-client-tools'
+  ]
 
-package {'r10k':
+$puppet_modules = [
+  'puppetlabs-puppetdb'
+]
+
+package {$yum_packages:
+  ensure => 'installed',
+}
+
+package {$gem_packages:
   ensure          => 'installed',
   provider        => 'gem',
   install_options => '--no-document',
 }
 
-exec { 'puppet_module_puppetdb':
-  command => 'puppet module install puppetlabs-puppetdb',
-  unless  => 'puppet module list | grep puppetlabs-puppetdb',
-  path    => ['/bin', '/opt/puppetlabs/bin']
+# Make installing a module idempotent
+$puppet_modules.each $::module {
+  exec { "puppet_module_${module}":
+    command => "puppet module install ${::module}",
+    unless  => "puppet module list | grep ${::module}",
+    path    => ['/bin', '/opt/puppetlabs/bin']
+  }
 }
 
-# Configure SSH to store keys in a directory we're saving. Setup for git
+# Configure SSH to store keys in a directory that is saved in a docker volume
 file {'/etc/puppetlabs/r10k':
   ensure => directory,
 }
@@ -34,6 +48,7 @@ file {['/etc/puppetlabs/r10k/ssh', '/root/.ssh']:
   mode   => '0700',
 }
 
+# TODO This might need to be changed when droping root privlidges
 file { '/root/.ssh/config':
   ensure  => present,
   mode    => '0600',

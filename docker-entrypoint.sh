@@ -13,6 +13,12 @@ if [ $1 = "puppetserver" ]; then
   ## Puppetserver startup doesn't recreate this directory
   ## https://tickets.puppetlabs.com/browse/SERVER-441
 
+  ## Import CA from URL for selfsigned sites
+  if [ -v IMPORT_SELFSIGNED_URL ]; then
+    openssl s_client -connect $IMPORT_SELFSIGNED_URL:443 <<<'' | openssl x509 -out /etc/pki/ca-trust/source/anchors/$IMPORT_SELFSIGNED_URL.pem
+    update-ca-trust
+  fi
+
   # Set default r10k repo url, if set
   # TODO Set DEFAULT_R10K_REPO_URL to a local directory with a default repo in it
   if [ -v DEFAULT_R10K_REPO_URL ]; then
