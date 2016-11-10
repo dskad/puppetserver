@@ -1,6 +1,4 @@
-node default {}
-
-node 'MYLOCALHOST' {
+node default {
   # Connect to puppetdb server
   if str2bool($facts['puppetdb_up']) == true {
     class { 'puppetdb::master::config':
@@ -13,6 +11,7 @@ node 'MYLOCALHOST' {
       strict_validation       => true,
       restart_puppet          => true,
       # puppetdb_soft_write_failure => true,
+      tag                     => ['puppetserver'],
     }
   }
   else {
@@ -25,7 +24,7 @@ node 'MYLOCALHOST' {
       manage_storeconfigs     => false,
       strict_validation       => false,
       restart_puppet          => false,
-
+      tag                     => ['puppetserver'],
     }
   }
 }
@@ -39,6 +38,7 @@ node 'puppetdb.example.com' {
     ssl_deploy_certs        => true,
     node_ttl                => '15m',
     node_purge_ttl          => '30m',
+    tag                     => ['puppetdb'],
   }
 }
 
