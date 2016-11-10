@@ -7,8 +7,7 @@ RUNINTERVAL=30m \
 PUPPETSERVER_JAVA_ARGS="-Xms2g -Xmx2g" \
 DNSALTNAMES="puppet,puppet.example.com" \
 PUPPETDB_SERVER="localhost" \
-PUPPETDB_PORT="8081"
-TAGS="puppet,puppetserver"
+PUPPETDB_PORT="8081" \
 DEFAULT_ENV_REPO_URL="https://gitlab.example.com/dan/control.git"
 ## DEFAULT_R10K_REPO_URL
 ##  Set to the location of your default (bootstrap)
