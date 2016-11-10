@@ -31,7 +31,7 @@ package {$gem_packages:
 
 # Make installing a module idempotent
 $puppet_modules.each $::module {
-  exec { "puppet_module_${module}":
+  exec { "puppet_module_${::module}":
     command => "puppet module install ${::module}",
     unless  => "puppet module list | grep ${::module}",
     path    => ['/bin', '/opt/puppetlabs/bin']
