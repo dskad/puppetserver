@@ -29,22 +29,23 @@ DEFAULT_ENV_REPO_URL="https://gitlab.example.com/dan/control.git"
 ##  --build-arg PUPPETSERVER_VERSION="2.3.1"
 # ARG PUPPETSERVER_VERSION
 
-COPY bootstrap_server.pp /build/bootstrap_server.pp
-RUN puppet apply /build/bootstrap_server.pp -v
-
 ## r10k config template. Repo url gets updated in docker-entrypoint on start up from ENV
 ## If additional repos are needed, configure and refresh with puppet (eg. zack/r10k)
 COPY r10k.yaml /etc/puppetlabs/r10k/r10k.yaml
 
+COPY bootstrap_server.pp /build/bootstrap_server.pp
+RUN puppet apply /build/bootstrap_server.pp -v
+
 ## Add custom fact to detect when puppetdb is on line.
 ## This will be used in the control repo to connect the server to puppetdb when it is available
-COPY puppetdb_up.sh /opt/puppetlabs/facter/facts.d/puppetdb_up.sh
+# COPY puppetdb_up.sh /opt/puppetlabs/facter/facts.d/puppetdb_up.sh
 
 ## This configures the pre-startup environment in the container
 COPY docker-entrypoint.sh /docker-entrypoint.sh
 
-RUN chmod +x /docker-entrypoint.sh \
-  && chmod +x /opt/puppetlabs/facter/facts.d/puppetdb_up.sh \
+RUN chmod +x /docker-entrypoint.sh
+# RUN chmod +x /docker-entrypoint.sh \
+#   && chmod +x /opt/puppetlabs/facter/facts.d/puppetdb_up.sh \
 
   # Set JAVA_ARGS from the environment variable PUPPETSERVER_JAVA_ARGS
   && sed -i "s/\"-Xms2g -Xmx2g -XX:MaxPermSize=256m\"/\$PUPPETSERVER_JAVA_ARGS/" \
