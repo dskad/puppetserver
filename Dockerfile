@@ -1,14 +1,22 @@
 FROM puppetagent
-MAINTAINER Dan Skadra <dskadra@gmail.com>
 
-ENV PATH="/opt/puppetlabs/server/bin:$PATH" \
-PUPPETENV=production \
-RUNINTERVAL=30m \
-PUPPETSERVER_JAVA_ARGS="-Xms2g -Xmx2g" \
-DNSALTNAMES="puppet,puppet.example.com" \
-PUPPETDB_SERVER="localhost" \
-PUPPETDB_PORT="8081" \
-DEFAULT_ENV_REPO_URL="https://gitlab.example.com/dan/control.git"
+ENV PATH="/opt/puppetlabs/server/bin:$PATH"
+# PUPPETENV=production \
+# RUNINTERVAL=30m \
+# PUPPETSERVER_JAVA_ARGS="-Xms2g -Xmx2g" \
+# DNSALTNAMES="puppet,puppet.example.com" \
+#PUPPETDB_SERVER="localhost" \
+#PUPPETDB_PORT="8081" \
+
+ARG FACTER_CONTAINER_ROLE="puppetserver"
+ARG FACTER_PUPPET_ENVIRONMENT="puppet"
+ARG FACTER_BUILD_REPO="http://gitlab.example.com/dan/control-puppet.git"
+#ARG FACTER_HOST_KEY="MyHostKey"
+#ARG FACTER_GSM_TOKEN="MyAccessToken"
+#ARG FACTER_GSM_PROJECT_NAME="MyUserName/MyProject"
+#ARG FACTER_GSM_URL="https://gitlab.example.com"
+#ARG FACTER_GSM_PROVIDER="gitlab"
+
 ## DEFAULT_R10K_REPO_URL
 ##  Set to the location of your default (bootstrap)
 ##  control repository for a fully functional puppet server setup. It is left blank here
@@ -16,43 +24,34 @@ DEFAULT_ENV_REPO_URL="https://gitlab.example.com/dan/control.git"
 ##  need to set up a git repository and control repo
 ##    Example:
 ##      DEFAULT_R10K_REPO_URL="http://127.0.0.1/gituser/control-repo.git"
-##
-## R10K_FILE_URL
-##  URL of a r10k.yaml file to use at container start up. This overides
-##  DEFAULT_R10K_REPO_URL. This allows for the initial configuration of multiple
-##  repositories.
 
-## Latest by default, uncomment to pin specific versions or supply with --build-arg PUPPETSERVER_VERSION
-## Requires docker-engine >= 1.9
-## Examples:
-##  --build-arg PUPPETSERVER_VERSION="2.3.*"
-##  --build-arg PUPPETSERVER_VERSION="2.3.1"
-# ARG PUPPETSERVER_VERSION
-
-## r10k config template. Repo url gets updated in docker-entrypoint on start up from ENV
-## If additional repos are needed, configure and refresh with puppet (eg. zack/r10k)
-COPY r10k.yaml /etc/puppetlabs/r10k/r10k.yaml
-
-COPY bootstrap_server.pp /build/bootstrap_server.pp
-RUN puppet apply /build/bootstrap_server.pp -v
-
-## Add custom fact to detect when puppetdb is on line.
-## This will be used in the control repo to connect the server to puppetdb when it is available
-# COPY puppetdb_up.sh /opt/puppetlabs/facter/facts.d/puppetdb_up.sh
-
-## This configures the pre-startup environment in the container
 COPY docker-entrypoint.sh /docker-entrypoint.sh
 
-RUN chmod +x /docker-entrypoint.sh
-# RUN chmod +x /docker-entrypoint.sh \
-#   && chmod +x /opt/puppetlabs/facter/facts.d/puppetdb_up.sh \
+COPY dskad-builder-0.1.0.tar.gz /build/dskad-builder-0.1.0.tar.gz
 
-  # Set JAVA_ARGS from the environment variable PUPPETSERVER_JAVA_ARGS
-  && sed -i "s/\"-Xms2g -Xmx2g -XX:MaxPermSize=256m\"/\$PUPPETSERVER_JAVA_ARGS/" \
-    /etc/sysconfig/puppetserver \
+## Run puppet build bootstrap
+RUN chmod +x /docker-entrypoint.sh && \
+  puppet module install /build/dskad-builder-0.1.0.tar.gz -v && \
+  # puppet module install dskad-builder -v && \
 
-  # Fix forground command so it can listen for signals from docker
-  && sed -i "s/runuser \"/exec runuser \"/" \
+  # setup r10k to retrieve current environments from supplied control repo
+  puppet apply -v -e 'include builder::bootstrap' && \
+
+  # Run R10k to pull latest config
+  r10k deploy environment -p -v debug && \
+
+  # Build the image according to the newly appled environment
+  puppet apply /etc/puppetlabs/code/environments/puppet/manifests/site.pp -v && \
+
+  # Clean up reports from build process
+  rm -rf /opt/puppetlabs/puppet/cache/* && \
+
+  # Clean build SSH keys. New keys will be generated on 1st run
+#  rm -rf /etc/puppetlabs/r10k/ssh/* && \
+
+# Fix forground command so it can listen for signals from docker
+# TODO Can I do this in puppet?
+  sed -i "s/runuser \"/exec runuser \"/" \
     /opt/puppetlabs/server/apps/puppetserver/cli/apps/foreground
 
 ## Save the important stuff!
