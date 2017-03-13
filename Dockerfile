@@ -1,14 +1,9 @@
 FROM puppetagent
 
-ENV PATH="/opt/puppetlabs/server/bin:$PATH"
-# PUPPETENV=production \
-# RUNINTERVAL=30m \
-# PUPPETSERVER_JAVA_ARGS="-Xms2g -Xmx2g" \
-# DNSALTNAMES="puppet,puppet.example.com" \
-#PUPPETDB_SERVER="localhost" \
-#PUPPETDB_PORT="8081" \
+ENV PATH="/opt/puppetlabs/server/bin:$PATH" \
+    FACTER_CONTAINER_ROLE="puppetserver"
 
-ARG FACTER_CONTAINER_ROLE="puppetserver"
+# Build time options
 ARG FACTER_PUPPET_ENVIRONMENT="puppet"
 ARG FACTER_BUILD_REPO="http://gitlab.example.com/dan/control-puppet.git"
 #ARG FACTER_HOST_KEY="MyHostKey"
@@ -31,7 +26,7 @@ COPY dskad-builder-0.1.0.tar.gz /build/dskad-builder-0.1.0.tar.gz
 
 ## Run puppet build bootstrap
 RUN chmod +x /docker-entrypoint.sh && \
-  puppet module install /build/dskad-builder-0.1.0.tar.gz -v && \
+  puppet module install /build/dskad-builder-0.1.0.tar.gz && \
   # puppet module install dskad-builder -v && \
 
   # setup r10k to retrieve current environments from supplied control repo
@@ -43,7 +38,10 @@ RUN chmod +x /docker-entrypoint.sh && \
   # Build the image according to the newly appled environment
   puppet apply /etc/puppetlabs/code/environments/puppet/manifests/site.pp -v && \
 
-  # Clean up reports from build process
+  # Clean up
+  puppet apply -v -e 'include builder::cleanup' && \
+
+  # Clean up puppet cache from build process
   rm -rf /opt/puppetlabs/puppet/cache/* && \
 
   # Clean build SSH keys. New keys will be generated on 1st run

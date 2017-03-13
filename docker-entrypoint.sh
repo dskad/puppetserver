@@ -21,8 +21,8 @@ if [ $1 = "puppetserver" ]; then
     ssh-keygen -b 4096 -f /etc/puppetlabs/r10k/.ssh/id_rsa -t rsa -N ""
   fi
 
-  ## This script runs before sytemd init and is good for initalization or pre-startup tasks
-  ## Only initalize and setup the environments (via r10k) if server is launching
+  ## This script runs before systemd init and is good for initialization or pre-startup tasks
+  ## Only initialize and setup the environments (via r10k) if server is launching
   ##    for the first time (i.e. new server container). We don't want to unintentionally
   ##    upgrade an environment or break certs on a container restart or upgrade.
   if [ ! -d  /etc/puppetlabs/puppet/ssl/ca ]; then
@@ -40,6 +40,6 @@ if [ $1 = "puppetserver" ]; then
   fi
 fi
 
-## Pass control on to the command suppled on the CMD line of the Dockerfile
+## Pass control on to the command supplied on the CMD line of the Dockerfile
 ## This makes supervisor PID 1
 exec "$@"
