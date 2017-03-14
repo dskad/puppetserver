@@ -1,18 +1,20 @@
 #!/bin/bash
-## unoficial "strict mode" http://redsymbol.net/articles/unofficial-bash-strict-mode/
+## unofficial "strict mode" http://redsymbol.net/articles/unofficial-bash-strict-mode/
 ## with modification, we want unbound variables to allow extra runtime configs
 set -eo pipefail
 if [ -v DEBUG ]; then
   set -x
 fi
 
-# IFS=$'\n\t'
+# Apply current config for this instance
+puppet apply /etc/puppetlabs/code/environments/puppet/manifests/site.pp -v
 
 if [ $1 = "puppetserver" ]; then
   if [ -v IMPORT_SELFSIGNED_URL ]; then
   :
 #  FIXME
-#    openssl s_client -connect $IMPORT_SELFSIGNED_URL:443 <<<'' | openssl x509 -out /etc/pki/ca-trust/source/anchors/$IMPORT_SELFSIGNED_URL.pem
+#    openssl s_client -connect $IMPORT_SELFSIGNED_URL:443 <<<'' \
+#     | openssl x509 -out /etc/pki/ca-trust/source/anchors/$IMPORT_SELFSIGNED_URL.pem
 #    update-ca-trust
   fi
 

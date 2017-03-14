@@ -45,7 +45,10 @@ RUN chmod +x /docker-entrypoint.sh && \
   rm -rf /opt/puppetlabs/puppet/cache/* && \
 
   # Clean build SSH keys. New keys will be generated on 1st run
-#  rm -rf /etc/puppetlabs/r10k/ssh/* && \
+  rm -rf /etc/puppetlabs/r10k/ssh/* && \
+
+  # Clean tmp
+  find /tmp -mindepth 1 -delete && \
 
 # Fix forground command so it can listen for signals from docker
 # TODO Can I do this in puppet?
