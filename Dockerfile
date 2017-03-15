@@ -3,25 +3,21 @@ FROM puppetagent
 ENV PATH="/opt/puppetlabs/server/bin:$PATH" \
     FACTER_CONTAINER_ROLE="puppetserver"
 
-# Build time options
+## Build time options
+# Required
 ARG FACTER_PUPPET_ENVIRONMENT="puppet"
 ARG FACTER_BUILD_REPO="http://gitlab.example.com/dan/control-puppet.git"
+
+# Optional
 #ARG FACTER_HOST_KEY="MyHostKey"
 #ARG FACTER_GSM_TOKEN="MyAccessToken"
 #ARG FACTER_GSM_PROJECT_NAME="MyUserName/MyProject"
 #ARG FACTER_GSM_URL="https://gitlab.example.com"
 #ARG FACTER_GSM_PROVIDER="gitlab"
 
-## DEFAULT_R10K_REPO_URL
-##  Set to the location of your default (bootstrap)
-##  control repository for a fully functional puppet server setup. It is left blank here
-##  so that this image can start up a self contained instance of puppetserver, with out the
-##  need to set up a git repository and control repo
-##    Example:
-##      DEFAULT_R10K_REPO_URL="http://127.0.0.1/gituser/control-repo.git"
-
 COPY docker-entrypoint.sh /docker-entrypoint.sh
 
+# TODO Remove this once hosted online
 COPY dskad-builder-0.1.0.tar.gz /build/dskad-builder-0.1.0.tar.gz
 
 ## Run puppet build bootstrap
@@ -51,7 +47,6 @@ RUN chmod +x /docker-entrypoint.sh && \
   find /tmp -mindepth 1 -delete && \
 
 # Fix forground command so it can listen for signals from docker
-# TODO Can I do this in puppet?
   sed -i "s/runuser \"/exec runuser \"/" \
     /opt/puppetlabs/server/apps/puppetserver/cli/apps/foreground
 
@@ -65,8 +60,7 @@ RUN chmod +x /docker-entrypoint.sh && \
 VOLUME ["/etc/puppetlabs", \
         "/opt/puppetlabs/puppet/cache", \
         "/opt/puppetlabs/server/data", \
-        "/var/log/puppetlabs", \
-        "/var/cache/r10k" ]
+        "/var/log/puppetlabs" ]
 
 EXPOSE 8140
 
