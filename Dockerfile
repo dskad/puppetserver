@@ -10,10 +10,10 @@ ARG FACTER_BUILD_REPO="http://gitlab.example.com/dan/control-puppet.git"
 
 # Optional
 #ARG FACTER_HOST_KEY="MyHostKey"
-#ARG FACTER_GSM_TOKEN="MyAccessToken"
-#ARG FACTER_GSM_PROJECT_NAME="MyUserName/MyProject"
-#ARG FACTER_GSM_URL="https://gitlab.example.com"
-#ARG FACTER_GSM_PROVIDER="gitlab"
+#ARG FACTER_GMS_TOKEN="MyAccessToken"
+#ARG FACTER_GMS_PROJECT_NAME="MyUserName/MyProject"
+#ARG FACTER_GMS_URL="https://gitlab.example.com"
+#ARG FACTER_GMS_PROVIDER="gitlab"
 
 COPY docker-entrypoint.sh /docker-entrypoint.sh
 
