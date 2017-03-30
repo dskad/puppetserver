@@ -22,7 +22,7 @@ COPY dskad-builder-0.1.0.tar.gz /build/dskad-builder-0.1.0.tar.gz
 
 ## Run puppet build bootstrap
 RUN chmod +x /docker-entrypoint.sh && \
-  puppet module install /build/dskad-builder-0.1.0.tar.gz && \
+  puppet module install /build/dskad-builder-0.1.0.tar.gz && \ #TODO remove this when hosted online
   # puppet module install dskad-builder -v && \
 
   # setup r10k to retrieve current environments from supplied control repo

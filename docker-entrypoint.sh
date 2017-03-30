@@ -6,22 +6,20 @@ if [ -v DEBUG ]; then
   set -x
 fi
 
-# Apply current config for this instance
-puppet apply /etc/puppetlabs/code/environments/puppet/manifests/site.pp -v
-
 if [ $1 = "puppetserver" ]; then
-  if [ -v IMPORT_SELFSIGNED_URL ]; then
-  :
-#  FIXME
-#    openssl s_client -connect $IMPORT_SELFSIGNED_URL:443 <<<'' \
-#     | openssl x509 -out /etc/pki/ca-trust/source/anchors/$IMPORT_SELFSIGNED_URL.pem
-#    update-ca-trust
-  fi
-
   # Generate SSH key pair for R10k if it doesn't exist
   if [[ ! -f  /etc/puppetlabs/r10k/.ssh/id_rsa ]]; then
     ssh-keygen -b 4096 -f /etc/puppetlabs/r10k/.ssh/id_rsa -t rsa -N ""
   fi
+
+  # Run R10k to update local environments
+  #   Changes to the R10k configuration should be changed in the image and rebuilt
+  r10k deploy environment -p -v
+
+  # Apply current config for this instance. Volumes retain config across container restarts
+  puppet apply /etc/puppetlabs/code/environments/puppet/manifests/site.pp -v
+
+  # If the image is up to date, the r10k and puppet runs above should be quick
 
   ## This script runs before systemd init and is good for initialization or pre-startup tasks
   ## Only initialize and setup the environments (via r10k) if server is launching
