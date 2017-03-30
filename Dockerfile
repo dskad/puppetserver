@@ -6,7 +6,7 @@ ENV PATH="/opt/puppetlabs/server/bin:$PATH" \
 ## Build time options
 # Required
 ARG FACTER_PUPPET_ENVIRONMENT="puppet"
-ARG FACTER_BUILD_REPO="http://gitlab.example.com/dan/control-puppet.git"
+ARG FACTER_BUILD_REPO="http://192.168.10.50/dan/control-puppet.git"
 
 # Optional
 #ARG FACTER_HOST_KEY="MyHostKey"
