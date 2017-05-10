@@ -51,12 +51,6 @@ RUN chmod +x /docker-entrypoint.sh && \
     /opt/puppetlabs/server/apps/puppetserver/cli/apps/foreground
 
 ## Save the important stuff!
-## Note1: /var/cache/r10k needs to match the cachdir value in r10k.conf file
-## Note2: /opt/puppetlabs/puppet/modules is not saved.
-##        Use /etc/puppetlabs/code/modules for global modules
-## Note3: /opt/puppetlabs/facter/facts.d is not saved.
-##        Use /etc/puppetlabs/facter/facts.d for custom global facts
-## TODO Add mcollective and pxp-agent volumes
 VOLUME ["/etc/puppetlabs", \
         "/opt/puppetlabs/puppet/cache", \
         "/opt/puppetlabs/server/data", \
