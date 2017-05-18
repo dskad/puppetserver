@@ -9,11 +9,11 @@ ARG FACTER_PUPPET_ENVIRONMENT="puppet"
 ARG FACTER_BUILD_REPO="http://192.168.10.50/dan/control-puppet.git"
 
 # Optional
-#ARG FACTER_HOST_KEY="MyHostKey"
-#ARG FACTER_GMS_TOKEN="MyAccessToken"
-#ARG FACTER_GMS_PROJECT_NAME="MyUserName/MyProject"
-#ARG FACTER_GMS_URL="https://gitlab.example.com"
-#ARG FACTER_GMS_PROVIDER="gitlab"
+ARG FACTER_HOST_KEY
+ARG FACTER_GMS_TOKEN
+ARG FACTER_GMS_PROJECT
+ARG FACTER_GMS_URL
+ARG FACTER_GMS_PROVIDER
 
 COPY docker-entrypoint.sh /docker-entrypoint.sh
 
