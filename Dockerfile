@@ -22,6 +22,7 @@ COPY dskad-builder-0.1.0.tar.gz /build/dskad-builder-0.1.0.tar.gz
 
 ## Run puppet build bootstrap
 RUN chmod +x /docker-entrypoint.sh && \
+  facter puppet_environment build_repo host_key gms_token gms_project_name gms_url gms_provider && \
   puppet module install /build/dskad-builder-0.1.0.tar.gz && \
   # puppet module install dskad-builder -v && \
 
