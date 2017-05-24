@@ -6,14 +6,14 @@ ENV PATH="/opt/puppetlabs/server/bin:$PATH" \
 ## Build time options
 # Required
 ARG FACTER_PUPPET_ENVIRONMENT="puppet"
-ARG FACTER_BUILD_REPO="http://192.168.10.50/dan/control-puppet.git"
+ARG FACTER_BUILD_REPO="https://192.168.10.50/dan/control-puppet.git"
 
 # Optional
 ARG FACTER_HOST_KEY
 ARG FACTER_GMS_TOKEN
 ARG FACTER_GMS_PROJECT
 ARG FACTER_GMS_URL
-ARG FACTER_GMS_PROVIDER
+ARG FACTER_GMS_PROVIDER="gitlab"
 
 COPY docker-entrypoint.sh /docker-entrypoint.sh
 
