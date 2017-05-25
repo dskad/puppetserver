@@ -16,13 +16,20 @@ ARG FACTER_GMS_URL
 ARG FACTER_GMS_PROVIDER="gitlab"
 
 COPY docker-entrypoint.sh /docker-entrypoint.sh
+COPY hiera.yaml /etc/puppetlabs/code/environments/production/hiera.yaml
+COPY common.yaml /etc/puppetlabs/code/environments/production/data/common.yaml
 
 # TODO Remove this once hosted online
 COPY dskad-builder-0.1.0.tar.gz /build/dskad-builder-0.1.0.tar.gz
 
 ## Run puppet build bootstrap
 RUN chmod +x /docker-entrypoint.sh && \
+  rm -f /etc/puppetlabs/puppet.hiera.yaml && \
+  rm -rf /etc/puppetlabs/code/environments/production/hieradata && \
+
+  # DEBUG
   facter puppet_environment build_repo host_key gms_token gms_project_name gms_url gms_provider && \
+
   puppet module install /build/dskad-builder-0.1.0.tar.gz && \
   # puppet module install dskad-builder -v && \
 
@@ -42,7 +49,7 @@ RUN chmod +x /docker-entrypoint.sh && \
   rm -rf /opt/puppetlabs/puppet/cache/* && \
 
   # Clean build SSH keys. New keys will be generated on 1st run
-  rm -rf /etc/puppetlabs/r10k/ssh/* && \
+  # rm -rf /etc/puppetlabs/r10k/ssh/* && \
 
   # Clean tmp
   find /tmp -mindepth 1 -delete && \
