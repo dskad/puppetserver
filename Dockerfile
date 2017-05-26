@@ -3,18 +3,6 @@ FROM puppetagent
 ENV PATH="/opt/puppetlabs/server/bin:$PATH" \
     FACTER_CONTAINER_ROLE="puppetserver"
 
-## Build time options
-# Required
-ARG FACTER_PUPPET_ENVIRONMENT="puppet"
-ARG FACTER_BUILD_REPO="ssh://git@192.168.10.50:2222/dan/control-puppet.git"
-
-# Optional
-ARG FACTER_HOST_KEY
-ARG FACTER_GMS_TOKEN
-ARG FACTER_GMS_PROJECT_NAME
-ARG FACTER_GMS_URL
-ARG FACTER_GMS_PROVIDER="gitlab"
-
 COPY docker-entrypoint.sh /docker-entrypoint.sh
 COPY hiera.yaml /etc/puppetlabs/code/environments/production/hiera.yaml
 COPY common.yaml /etc/puppetlabs/code/environments/production/data/common.yaml
@@ -27,9 +15,7 @@ RUN chmod +x /docker-entrypoint.sh && \
   rm -f /etc/puppetlabs/puppet.hiera.yaml && \
   rm -rf /etc/puppetlabs/code/environments/production/hieradata && \
 
-  # DEBUG
-  facter puppet_environment build_repo host_key gms_token gms_project_name gms_url gms_provider && \
-
+  # Install module to bootstrap environment
   puppet module install /build/dskad-builder-0.1.0.tar.gz && \
   # puppet module install dskad-builder -v && \
 
