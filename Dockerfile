@@ -19,11 +19,11 @@ RUN chmod +x /docker-entrypoint.sh && \
   rm -rf /etc/puppetlabs/code/environments/production/hieradata && \
 
   # Install module to bootstrap environment
-  puppet module install -v --modulepath /build/modules /build/dskad-builder-0.1.0.tar.gz && \
-  # puppet module install -v --modulepath /build/modules dskad-builder && \
+  puppet module install -v --modulepath=/build/modules /build/dskad-builder-0.1.0.tar.gz && \
+  # puppet module install -v --modulepath=/build/modules dskad-builder && \
 
   # setup r10k to retrieve current environments from supplied control repo
-  puppet apply -v -e 'include builder::bootstrap' --modulepath /build/modules --hiera_config /build/hiera.yaml && \
+  puppet apply -v -e 'include builder::bootstrap' --modulepath=/build/modules --hiera_config=/build/hiera.yaml && \
 
   # Run R10k to pull latest config
   r10k deploy environment -p -v debug && \
@@ -32,7 +32,7 @@ RUN chmod +x /docker-entrypoint.sh && \
   puppet apply -v --environment=puppet /etc/puppetlabs/code/environments/puppet/manifests/site.pp && \
 
   # Clean up
-  puppet apply -v -e 'include builder::cleanup' --modulepath /build/modules --hiera_config /build/hiera.yaml && \
+  puppet apply -v -e 'include builder::cleanup' --modulepath=/build/modules --hiera_config=/build/hiera.yaml && \
 
   # Clean up puppet cache from build process
   rm -rf /opt/puppetlabs/puppet/cache/* && \
