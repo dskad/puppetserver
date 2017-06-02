@@ -8,8 +8,8 @@ fi
 
 if [ $1 = "puppetserver" ]; then
   # Generate SSH key pair for R10k if it doesn't exist
-  if [[ ! -f  /etc/puppetlabs/r10k/.ssh/id_rsa ]]; then
-    ssh-keygen -b 4096 -f /etc/puppetlabs/r10k/.ssh/id_rsa -t rsa -N ""
+  if [[ ! -f  /etc/puppetlabs/r10k/ssh/id_rsa ]]; then
+    ssh-keygen -b 4096 -f /etc/puppetlabs/r10k/ssh/id_rsa -t rsa -N ""
   fi
 
   # Run R10k to update local environments
