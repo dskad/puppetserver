@@ -1,49 +1,24 @@
 ---
-builder::puppet_environment: 'puppet'
+# This configuration is for the build process only. Just enough to talk to
+#  the git server and pull down the runtime pupept environments via R10k
+
 builder::build_control_repo: 'ssh://git@192.168.10.50:2222/dan/control-puppet.git'
 builder::git_server_ssh_host_key:
 builder::git_server_api_token: 'NuVxbpU6vubf5SoaXCof'
 builder::git_project_name: 'dan/control-puppet'
 builder::git_server_url: 'https://192.168.10.50'
 builder::git_server_provider: 'gitlab'
+
+# Sample CA/Self-signed certificate for git when not using SSH
+# Note: The abrader-gms module used here disables SSL validation, so we don't need
+#         to add a CA cert to the default system certificate bundle
+
 #builder::git_ca_certs:
 #  git-server.example.com:
 #    -----BEGIN CERTIFICATE-----
 #    <Certificate Data>
 #    -----END CERTIFICATE-----
 builder::git_ca_certs:
-  snoopy: |
-    -----BEGIN CERTIFICATE-----
-    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
-    -----END CERTIFICATE-----
   gitlab.example.com: |
     -----BEGIN CERTIFICATE-----
     MIIDjzCCAnegAwIBAgIJAIe29Efnn1ikMA0GCSqGSIb3DQEBCwUAMGExCzAJBgNV
