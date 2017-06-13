@@ -35,6 +35,7 @@ RUN chmod +x /docker-entrypoint.sh && \
 
   # Clean up puppet cache from build process
   rm -rf /opt/puppetlabs/puppet/cache/* && \
+  rm /etc/puppetlabs/r10k/ssh/* && /
 
   # Clean tmp
   find /tmp -mindepth 1 -delete && \
