@@ -25,6 +25,7 @@ RUN chmod +x /docker-entrypoint.sh && \
   puppet apply -v -e 'include builder::bootstrap' --modulepath=/build/modules --hiera_config=/build/hiera.yaml && \
 
   # Run R10k to pull latest config
+  sleep 5 && \
   r10k deploy environment -p -v debug && \
 
   # Build the image according to the newly appled environment
