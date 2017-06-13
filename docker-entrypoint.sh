@@ -12,15 +12,6 @@ if [ $1 = "puppetserver" ]; then
     ssh-keygen -b 4096 -f /etc/puppetlabs/r10k/ssh/id_rsa -t rsa -N ""
   fi
 
-  # Run R10k to update local environments
-  #   Changes to the R10k configuration should be changed in the image and rebuilt
-  r10k deploy environment -p -v
-
-  # Apply current config for this instance. Volumes retain config across container restarts
-  puppet apply /etc/puppetlabs/code/environments/puppet/manifests/site.pp -v
-
-  # If the image is up to date, the r10k and puppet runs above should be quick
-
   ## This script runs before systemd init and is good for initialization or pre-startup tasks
   ## Only initialize and setup the environments (via r10k) if server is launching
   ##    for the first time (i.e. new server container). We don't want to unintentionally
@@ -37,7 +28,17 @@ if [ $1 = "puppetserver" ]; then
     # Note: hostname must be set at container runtime. facter can't properly resolve
     #   the hostname of the container when letting docker generate a random name
     puppet cert generate $(facter fqdn) -v
+
+    # Apply current config for this instance. Volumes retain config across container restarts
+    puppet apply /etc/puppetlabs/code/environments/puppet/manifests/site.pp -v
   fi
+
+  # Run R10k to update local environments
+  #   Changes to the R10k configuration should be changed in the image and rebuilt
+  r10k deploy environment -p -v
+
+  # Apply current config for this instance. Volumes retain config across container restarts
+  puppet apply /etc/puppetlabs/code/environments/puppet/manifests/site.pp -v
 fi
 
 ## Pass control on to the command supplied on the CMD line of the Dockerfile
