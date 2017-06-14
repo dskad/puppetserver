@@ -2,12 +2,12 @@
 # This configuration is for the build process only. Just enough to talk to
 #  the git server and pull down the runtime pupept environments via R10k
 
-builder::build_control_repo: 'ssh://git@192.168.10.50:2222/dan/control-puppet.git'
-builder::git_server_ssh_host_key:
-builder::git_server_api_token: 'NuVxbpU6vubf5SoaXCof'
-builder::git_project_name: 'dan/control-puppet'
-builder::git_server_url: 'https://192.168.10.50'
-builder::git_server_provider: 'gitlab'
+builder::build_control_repo: 'https://dan@192.168.10.50/dan/control-puppet.git'
+#builder::git_server_ssh_host_key:
+#builder::git_server_api_token: 'NuVxbpU6vubf5SoaXCof'
+#builder::git_project_name: 'dan/control-puppet'
+#builder::git_server_url: 'https://192.168.10.50'
+#builder::git_server_provider: 'gitlab'
 
 # Sample CA/Self-signed certificate for git when not using SSH
 # Note: The abrader-gms module used here disables SSL validation, so we don't need
