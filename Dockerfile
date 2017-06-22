@@ -9,8 +9,7 @@ COPY docker-entrypoint.sh /docker-entrypoint.sh
 
 # TODO look into using vault or multi-stage build to conseal secrets
 # TODO Here be secrets (in common.yaml) This is cached in the build layers...
-COPY common.yaml /build/data/common.yaml
-COPY hiera.yaml /build/hiera.yaml
+COPY build /build
 
 # TODO Remove this once hosted online
 COPY dskad-builder-0.1.0.tar.gz /build/dskad-builder-0.1.0.tar.gz
