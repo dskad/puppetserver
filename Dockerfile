@@ -7,7 +7,7 @@ ARG CONFIG_ENV="puppet"
 
 COPY docker-entrypoint.sh /docker-entrypoint.sh
 
-# TODO look into using vault or multi-stage build to conseal secrets
+# TODO look into using vault or multi-stage build to conceal secrets
 # TODO Here be secrets (in common.yaml) This is cached in the build layers...
 COPY build /build
 
@@ -27,7 +27,7 @@ RUN chmod +x /docker-entrypoint.sh && \
   sleep 5 && \
   r10k deploy environment -p -v debug && \
   \
-  # Build the image according to the newly appled environment
+  # Build the image according to the newly applied environment
   puppet apply -v --environment=${CONFIG_ENV} /etc/puppetlabs/code/environments/${CONFIG_ENV}/manifests/site.pp && \
   \
   # Clean up
@@ -38,12 +38,12 @@ RUN chmod +x /docker-entrypoint.sh && \
   rm -f /etc/puppetlabs/r10k/ssh/* && \
   \
   # Clean tmp
-  find /tmp -mindepth 1 -delete && \
+  # find /tmp -mindepth 1 -delete && \
   \
   # Remove build dir (secrets!)
   rm -rf /build && \
   \
-# Fix forground command so it can listen for signals from docker
+# Fix foreground command so it can listen for signals from docker
   sed -i "s/runuser \"/exec runuser \"/" \
           /opt/puppetlabs/server/apps/puppetserver/cli/apps/foreground
 
