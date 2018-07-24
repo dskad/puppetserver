@@ -41,7 +41,7 @@ RUN rpm -Uvh https://yum.puppetlabs.com/${PUPPET_RELEASE}/${PUPPET_RELEASE}-rele
   yum clean all && \
   rm -rf /var/cache/yum && \
   ## Install R10k and configure for running in a container
-  sed "s/JAVA_ARGS=.*$/JAVA_ARGS=\"\$JAVA_ARGS -Dlogappender=STDOUT\"/" puppetserver > /etc/default/puppetserver && \
+  sed "s/JAVA_ARGS=.*$/JAVA_ARGS=\"\$JAVA_ARGS -Dlogappender=STDOUT\"/" /etc/sysconfig/puppetserver > /etc/default/puppetserver && \
   /opt/puppetlabs/puppet/bin/gem install r10k -N ${R10k_VERSION:+--version }${R10k_VERSION} && \
   puppet config set --section agent environment docker_puppetserver && \
   mkdir -p /etc/puppetlabs/git/certs/ca && \
