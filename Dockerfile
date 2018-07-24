@@ -50,6 +50,8 @@ RUN rpm -Uvh https://yum.puppetlabs.com/${PUPPET_RELEASE}/${PUPPET_RELEASE}-rele
   chmod 700 /etc/puppetlabs/ssh && \
   echo "IdentityFile /etc/puppetlabs/ssh/id_rsa" >> /etc/ssh/ssh_config && \
   echo "GlobalKnownHostsFile /etc/puppetlabs/ssh/known_hosts" >> /etc/ssh/ssh_config && \
+  curl -Lo /bin/tini https://github.com/krallin/tini/releases/download/v0.18.0/tini && \
+  chmod +x /bin/tini && \
   # Install module to bootstrap environment
   # puppet module install -v --modulepath=/build/modules /build/dskad-builder-0.1.0.tar.gz && \
   # puppet module install -v --modulepath=/build/modules dskad-builder && \
@@ -88,5 +90,5 @@ VOLUME ["/etc/puppetlabs", \
 
 EXPOSE 8140
 
-ENTRYPOINT ["/docker-entrypoint.sh"]
+ENTRYPOINT ["/bin/tini", "--", "/docker-entrypoint.sh"]
 CMD ["puppetserver", "foreground"]
