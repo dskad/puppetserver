@@ -8,7 +8,7 @@ ENV PATH="$PATH:/opt/puppetlabs/bin:/opt/puppetlabs/puppet/bin:/opt/puppetlabs/s
   TERM=linux
 
 # Only used on first run when there is no server certificate yet, ignored otherwise
-ENV DNS_ALT_NAMES
+#ENV DNS_ALT_NAMES
 
 
 ## Latest by default, un-comment to pin specific versions or supply with --build-arg PUPPETSERVER_VERSION
