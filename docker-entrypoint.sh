@@ -8,10 +8,10 @@ fi
 
 if [ $1 = "puppetserver" ]; then
   # Generate SSH key pair for R10k if it doesn't exist
-  if [[ ! -f  /etc/puppetlabs/r10k/ssh/id_rsa ]]; then
-    ssh-keygen -b 4096 -f /etc/puppetlabs/r10k/ssh/id_rsa -t rsa -N ""
+  if [[ ! -f  /etc/puppetlabs/ssh/id_rsa ]]; then
+    ssh-keygen -b 4096 -f /etc/puppetlabs/ssh/id_rsa -t rsa -N ""
     echo "SSH public key:"
-    cat /etc/puppetlabs/r10k/ssh/id_rsa.pub
+    cat /etc/puppetlabs/ssh/id_rsa.pub
   fi
 
   ## This script runs before systemd init and is good for initialization or pre-startup tasks
