@@ -19,8 +19,6 @@ ARG R10k_VERSION
 ARG PUPPET_RELEASE="puppet5"
 
 COPY docker-entrypoint.sh /docker-entrypoint.sh
-COPY logback.xml /etc/puppetlabs/puppetserver/
-COPY request-logging.xml /etc/puppetlabs/puppetserver/
 
 RUN \
   # Import repository keys and add puppet repository
@@ -60,6 +58,9 @@ RUN \
   chmod +x /docker-entrypoint.sh && \
   yum clean all && \
   rm -rf /var/cache/yum
+
+COPY logback.xml /etc/puppetlabs/puppetserver/
+COPY request-logging.xml /etc/puppetlabs/puppetserver/
 
 ## Save the important stuff!
 VOLUME ["/etc/puppetlabs", \
