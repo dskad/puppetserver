@@ -7,6 +7,7 @@ ENV PATH="$PATH:/opt/puppetlabs/bin:/opt/puppetlabs/puppet/bin:/opt/puppetlabs/s
   LANG=en_US.utf8 \
   TERM=linux
 
+ENV DUMB_INIT_VERSION="1.2.1"
 # Only used on first run when there is no server certificate yet, ignored otherwise
 #ENV DNS_ALT_NAMES
 
@@ -50,8 +51,8 @@ RUN rpm -Uvh https://yum.puppetlabs.com/${PUPPET_RELEASE}/${PUPPET_RELEASE}-rele
   chmod 700 /etc/puppetlabs/ssh && \
   echo "IdentityFile /etc/puppetlabs/ssh/id_rsa" >> /etc/ssh/ssh_config && \
   echo "GlobalKnownHostsFile /etc/puppetlabs/ssh/known_hosts" >> /etc/ssh/ssh_config && \
-  curl -Lo /bin/tini https://github.com/krallin/tini/releases/download/v0.18.0/tini && \
-  chmod +x /bin/tini && \
+  curl -Lo /bin/dumb-init https://github.com/Yelp/dumb-init/releases/download/v${DUMB_INIT_VERSION}/dumb-init_${DUMB_INIT_VERSION}_amd64 && \
+  chmod +x /bin/dumb-init && \
   # Install module to bootstrap environment
   # puppet module install -v --modulepath=/build/modules /build/dskad-builder-0.1.0.tar.gz && \
   # puppet module install -v --modulepath=/build/modules dskad-builder && \
@@ -85,10 +86,9 @@ RUN rpm -Uvh https://yum.puppetlabs.com/${PUPPET_RELEASE}/${PUPPET_RELEASE}-rele
 ## Save the important stuff!
 VOLUME ["/etc/puppetlabs", \
   "/opt/puppetlabs/puppet/cache", \
-  "/opt/puppetlabs/server/data", \
-  "/var/log/puppetlabs" ]
+  "/opt/puppetlabs/server/data" ]
 
 EXPOSE 8140
 
-ENTRYPOINT ["/bin/tini", "--", "/docker-entrypoint.sh"]
+ENTRYPOINT ["/bin/dumb-init", "--", "/docker-entrypoint.sh"]
 CMD ["puppetserver", "foreground"]
