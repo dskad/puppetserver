@@ -7,11 +7,6 @@ ENV PATH="$PATH:/opt/puppetlabs/bin:/opt/puppetlabs/puppet/bin:/opt/puppetlabs/s
   LANG=en_US.utf8 \
   TERM=linux
 
-ENV DUMB_INIT_VERSION="1.2.1"
-# Only used on first run when there is no server certificate yet, ignored otherwise
-#ENV DNS_ALT_NAMES
-
-
 ## Latest by default, un-comment to pin specific versions or supply with --build-arg PUPPETSERVER_VERSION
 ## Example:
 ## ARG PUPPETSERVER_VERSION="1.10.*"
@@ -41,7 +36,6 @@ RUN rpm -Uvh https://yum.puppetlabs.com/${PUPPET_RELEASE}/${PUPPET_RELEASE}-rele
   puppetserver${PUPPETSERVER_VERSION:+-}${PUPPETSERVER_VERSION} && \
   yum clean all && \
   rm -rf /var/cache/yum && \
-  ## Install R10k and configure for running in a container
   sed "s/JAVA_ARGS=.*$/JAVA_ARGS=\"\$JAVA_ARGS -Dlogappender=STDOUT\"/" /etc/sysconfig/puppetserver > /etc/default/puppetserver && \
   /opt/puppetlabs/puppet/bin/gem install r10k -N ${R10k_VERSION:+--version }${R10k_VERSION} && \
   puppet config set --section agent environment docker_puppetserver && \
@@ -51,24 +45,6 @@ RUN rpm -Uvh https://yum.puppetlabs.com/${PUPPET_RELEASE}/${PUPPET_RELEASE}-rele
   chmod 700 /etc/puppetlabs/ssh && \
   echo "IdentityFile /etc/puppetlabs/ssh/id_rsa" >> /etc/ssh/ssh_config && \
   echo "GlobalKnownHostsFile /etc/puppetlabs/ssh/known_hosts" >> /etc/ssh/ssh_config && \
-  curl -Lo /bin/dumb-init https://github.com/Yelp/dumb-init/releases/download/v${DUMB_INIT_VERSION}/dumb-init_${DUMB_INIT_VERSION}_amd64 && \
-  chmod +x /bin/dumb-init && \
-  # Install module to bootstrap environment
-  # puppet module install -v --modulepath=/build/modules /build/dskad-builder-0.1.0.tar.gz && \
-  # puppet module install -v --modulepath=/build/modules dskad-builder && \
-  \
-  # setup r10k to retrieve current environments from supplied control repo
-  # puppet apply -v -e 'include builder::bootstrap' --modulepath=/build/modules --hiera_config=/build/hiera.yaml && \
-  \
-  # Run R10k to pull latest config
-  # r10k deploy environment -p -v debug && \
-  \
-  # Build the image according to the newly applied environment
-  # puppet apply -v --environment=docker_puppetserver /etc/puppetlabs/code/environments/${CONFIG_ENV}/manifests/site.pp && \
-  \
-  # Clean up
-  # puppet apply -v -e 'include builder::cleanup' --modulepath=/build/modules --hiera_config=/build/hiera.yaml && \
-  \
   # Clean up puppet cache from build process
   rm -rf /opt/puppetlabs/puppet/cache/* && \
   rm -f /etc/puppetlabs/r10k/ssh/* && \
@@ -78,10 +54,10 @@ RUN rpm -Uvh https://yum.puppetlabs.com/${PUPPET_RELEASE}/${PUPPET_RELEASE}-rele
   \
   # Remove build dir (secrets!)
   rm -rf /build && \
-  chmod +x /docker-entrypoint.sh
-# Fix foreground command so it can listen for signals from docker
-#sed -i "s/runuser \"/exec runuser \"/" \
-#/opt/puppetlabs/server/apps/puppetserver/cli/apps/foreground
+  chmod +x /docker-entrypoint.sh && \
+  # Fix foreground command so it can listen for signals from docker
+  sed -i "s/runuser \"/exec runuser \"/" \
+  /opt/puppetlabs/server/apps/puppetserver/cli/apps/foreground
 
 ## Save the important stuff!
 VOLUME ["/etc/puppetlabs", \
@@ -90,5 +66,5 @@ VOLUME ["/etc/puppetlabs", \
 
 EXPOSE 8140
 
-ENTRYPOINT ["/bin/dumb-init", "--", "/docker-entrypoint.sh"]
+ENTRYPOINT ["/docker-entrypoint.sh"]
 CMD ["puppetserver", "foreground"]
