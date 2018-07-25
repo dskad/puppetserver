@@ -18,6 +18,10 @@ ARG R10k_VERSION
 ## Current available releases: puppet5, puppet5-nightly, puppet6-nightly
 ARG PUPPET_RELEASE="puppet5"
 
+COPY docker-entrypoint.sh /docker-entrypoint.sh
+COPY logback.xml /etc/puppetlabs/puppetserver/
+COPY request-logging.xml /etc/puppetlabs/puppetserver/
+
 RUN \
   # Import repository keys and add puppet repository
   rpm --import http://mirror.centos.org/centos/RPM-GPG-KEY-CentOS-7 \
@@ -56,10 +60,6 @@ RUN \
   chmod +x /docker-entrypoint.sh && \
   yum clean all && \
   rm -rf /var/cache/yum
-
-COPY docker-entrypoint.sh /docker-entrypoint.sh
-COPY logback.xml /etc/puppetlabs/puppetserver/
-COPY request-logging.xml /etc/puppetlabs/puppetserver/
 
 ## Save the important stuff!
 VOLUME ["/etc/puppetlabs", \
