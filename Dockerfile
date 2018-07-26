@@ -4,10 +4,6 @@ LABEL maintainer="dskadra@gmail.com"
 
 ENV PATH="$PATH:/opt/puppetlabs/bin:/opt/puppetlabs/puppet/bin:/opt/puppetlabs/server/bin"
 ENV FACTER_CONTAINER_ROLE="puppetserver"
-ENV DNS_ALT_NAMES="DNS:puppet,DNS:puppet.example.com,IP:127.0.0.1"
-ENV JAVA_ARGS="-Xms2g -Xmx2g"
-ENV PUPPET_ADMIN_ENVIRONMENT="puppet-admin"
-ENV PUPPET_HEALTHCHECK_ENVIRONMENT="production"
 
 ## Current available releases: puppet5, puppet5-nightly, puppet6-nightly
 ENV PUPPET_RELEASE="puppet5"
@@ -68,6 +64,15 @@ COPY request-logging.xml /etc/puppetlabs/puppetserver/
 ## Save the important stuff!
 VOLUME ["/etc/puppetlabs", \
   "/opt/puppetlabs/server/data/puppetserver" ]
+
+# Run time defaults
+ENV DNS_ALT_NAMES="puppet,puppet.example.com"
+ENV JAVA_ARGS="-Xms2g -Xmx2g"
+ENV PUPPET_ADMIN_ENVIRONMENT="puppet-admin"
+ENV PUPPET_HEALTHCHECK_ENVIRONMENT="production"
+# To enable jruby9, set JRUBY_JAR to "/opt/puppetlabs/server/apps/puppetserver/jruby-9k.jar"
+ENV JRUBY_JAR=
+
 
 EXPOSE 8140
 
