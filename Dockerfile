@@ -4,8 +4,9 @@ LABEL maintainer="dskadra@gmail.com"
 
 ENV PATH="$PATH:/opt/puppetlabs/bin:/opt/puppetlabs/puppet/bin:/opt/puppetlabs/server/bin" \
   FACTER_CONTAINER_ROLE="puppetserver" \
-  LANG=en_US.utf8 \
-  TERM=linux
+  DNS_ALT_NAMES="puppet,puppet.example.com" \
+  JAVA_ARGS="-Xms2g -Xmx2g" \
+  PUPPET_ADMIN_ENVIRONMENT="puppet-admin"
 
 ## Latest by default, un-comment to pin specific versions or supply with --build-arg PUPPETSERVER_VERSION
 ## Example:
@@ -36,7 +37,7 @@ RUN \
   /opt/puppetlabs/puppet/bin/gem install r10k -N ${R10k_VERSION:+--version }${R10k_VERSION} && \
   \
   # Configure agent to use special environment
-  puppet config set --section agent environment docker_puppetserver && \
+  puppet config set --section agent environment ${PUPPET_ADMIN_ENVIRONMENT} && \
   \
   # Setup paths for CA certificates (used when pulling from internal repo that is self or internal CA signed)
   mkdir -p /etc/puppetlabs/git/certs/ca && \
