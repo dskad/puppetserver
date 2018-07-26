@@ -2,26 +2,27 @@ FROM centos:7
 
 LABEL maintainer="dskadra@gmail.com"
 
-ENV PATH="$PATH:/opt/puppetlabs/bin:/opt/puppetlabs/puppet/bin:/opt/puppetlabs/server/bin" \
-  FACTER_CONTAINER_ROLE="puppetserver" \
-  DNS_ALT_NAMES="puppet,puppet.example.com" \
-  JAVA_ARGS="-Xms2g -Xmx2g" \
-  PUPPET_ADMIN_ENVIRONMENT="puppet-admin"
-
-## Latest by default, un-comment to pin specific versions or supply with --build-arg PUPPETSERVER_VERSION
-## Example:
-## ARG PUPPETSERVER_VERSION="1.10.*"
-## ARG PUPPETSERVER_VERSION="1.10.1"
-## Requires docker-engine >= 1.9
-ARG PUPPETSERVER_VERSION
-ARG R10k_VERSION
+ENV PATH="$PATH:/opt/puppetlabs/bin:/opt/puppetlabs/puppet/bin:/opt/puppetlabs/server/bin"
+ENV FACTER_CONTAINER_ROLE="puppetserver"
+ENV DNS_ALT_NAMES="DNS:puppet,DNS:puppet.example.com,IP:127.0.0.1"
+ENV JAVA_ARGS="-Xms2g -Xmx2g"
+ENV PUPPET_ADMIN_ENVIRONMENT="puppet-admin"
+ENV PUPPET_HEALTHCHECK_ENVIRONMENT="production"
 
 ## Current available releases: puppet5, puppet5-nightly, puppet6-nightly
-ARG PUPPET_RELEASE="puppet5"
+ENV PUPPET_RELEASE="puppet5"
+
+## Latest by default, un-comment to pin specific versions or supply with -e PUPPETSERVER_VERSION
+## Example:
+## ENV PUPPETSERVER_VERSION="5.3.*"
+## ENV PUPPETSERVER_VERSION="5.3.4"
+ENV PUPPETSERVER_VERSION=
+ENV R10k_VERSION=
+ENV HIERA_EYAML_VERSION=
 
 COPY docker-entrypoint.sh /docker-entrypoint.sh
 
-RUN \
+RUN set -exo pipefail && \
   # Import repository keys and add puppet repository
   rpm --import http://mirror.centos.org/centos/RPM-GPG-KEY-CentOS-7 \
   --import https://yum.puppetlabs.com/RPM-GPG-KEY-puppet && \
@@ -30,11 +31,12 @@ RUN \
   # Update and install stuff
   yum -y update && \
   yum -y install \
-  git \
+  # git \
   puppetserver${PUPPETSERVER_VERSION:+-}${PUPPETSERVER_VERSION} && \
   \
-  # Install R10k via Ruby gem
+  # Install Ruby gems for R10k and hiera-eyaml
   /opt/puppetlabs/puppet/bin/gem install r10k -N ${R10k_VERSION:+--version }${R10k_VERSION} && \
+  /opt/puppetlabs/puppet/bin/gem install hiera-eyaml -N ${HIERA_EYAML_VERSION:+--version }${HIERA_EYAML_VERSION} && \
   \
   # Configure agent to use special environment
   puppet config set --section agent environment ${PUPPET_ADMIN_ENVIRONMENT} && \
@@ -71,3 +73,13 @@ EXPOSE 8140
 
 ENTRYPOINT ["/docker-entrypoint.sh"]
 CMD ["puppetserver", "foreground"]
+
+HEALTHCHECK --interval=10s --timeout=10s --retries=90 CMD \
+  curl --fail -H 'Accept: pson' \
+  --resolve 'puppet:8140:127.0.0.1' \
+  --cert   $(puppet config print hostcert) \
+  --key    $(puppet config print hostprivkey) \
+  --cacert $(puppet config print localcacert) \
+  https://puppet:8140/${PUPPET_HEALTHCHECK_ENVIRONMENT}/status/test \
+  |  grep -q '"is_alive":true' \
+  || exit 1
