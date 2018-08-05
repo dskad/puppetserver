@@ -1,13 +1,16 @@
 #!/bin/bash
-set -eo pipefail
+set -exo pipefail
 if [ -v DEBUG ]; then
   set -x
 fi
 
 if [ $1 = "puppetserver" ]; then
+  # Point the server's puppet agent to this host
+  puppet config set --section agent server $(facter hostname)
+
   # Generate SSH key pair for R10k if it doesn't exist
   if [[ ! -f  /etc/puppetlabs/ssh/id_rsa ]]; then
-    ssh-keygen -b 4096 -f /etc/puppetlabs/ssh/id_rsa -t rsa -N ""
+    ssh-keygen -b 4096 -f /etc/puppetlabs/ssh/id_rsa -C "r10k-$(facter fqdn)" -t rsa -N ""
     echo "SSH public key:"
     cat /etc/puppetlabs/ssh/id_rsa.pub
   fi

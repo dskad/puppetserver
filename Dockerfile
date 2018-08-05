@@ -4,6 +4,7 @@ LABEL maintainer="dskadra@gmail.com"
 
 ENV PATH="$PATH:/opt/puppetlabs/bin:/opt/puppetlabs/puppet/bin:/opt/puppetlabs/server/bin"
 ENV FACTER_CONTAINER_ROLE="puppetserver"
+ENV PUPPET_ADMIN_ENVIRONMENT="puppet_admin"
 
 ## Current available releases: puppet5, puppet5-nightly, puppet6-nightly
 ENV PUPPET_RELEASE="puppet5"
@@ -27,7 +28,7 @@ RUN set -exo pipefail && \
   # Update and install stuff
   yum -y update && \
   yum -y install \
-  # git \
+  git \
   puppetserver${PUPPETSERVER_VERSION:+-}${PUPPETSERVER_VERSION} && \
   \
   # Install Ruby gems for R10k and hiera-eyaml
@@ -68,11 +69,9 @@ VOLUME ["/etc/puppetlabs", \
 # Run time defaults
 ENV DNS_ALT_NAMES="puppet,puppet.example.com"
 ENV JAVA_ARGS="-Xms2g -Xmx2g"
-ENV PUPPET_ADMIN_ENVIRONMENT="puppet-admin"
 ENV PUPPET_HEALTHCHECK_ENVIRONMENT="production"
-# To enable jruby9, set JRUBY_JAR to "/opt/puppetlabs/server/apps/puppetserver/jruby-9k.jar"
+# To enable jruby9 in puppet5, set JRUBY_JAR to "/opt/puppetlabs/server/apps/puppetserver/jruby-9k.jar"
 ENV JRUBY_JAR=
-
 
 EXPOSE 8140
 
