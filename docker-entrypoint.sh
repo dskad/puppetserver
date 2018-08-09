@@ -83,8 +83,10 @@ if [[ "$1" = "puppetserver" ]]; then
   fi
 
   # Run R10k to update local environments if environment var set
-  #   Changes to the R10k configuration should be changed in the image and rebuilt
   # r10k deploy environment -p -v
+  if [[ "$R10K_ON_STARTUP" = "true" ]]; then
+    r10k deploy environment -p -v
+  fi
 
   # Apply current config for this instance. Volumes retain config across container restarts
   # puppet apply /etc/puppetlabs/code/environments/puppet/manifests/site.pp -v

@@ -76,6 +76,10 @@ ENV PUPPET_HEALTHCHECK_ENVIRONMENT="production"
 ENV JRUBY_JAR=
 ENV SSH_HOST_KEY_CHECK=true
 ENV TRUST_SSH_FIRST_CONNECT=true
+ENV R10K_ON_STARTUP=true
+ENV R10K_SOURCE1="production,ssh://git@gitlab.example.com:2222/dan/prod-control-repo.git,false"
+ENV R10K_SOURCE2="puppet,ssh://git@gitlab.example.com:2222/dan/control-puppet.git"
+
 
 EXPOSE 8140
 
