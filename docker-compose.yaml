@@ -12,7 +12,7 @@ services:
     networks:
       - puppetnet
     volumes:
-      - pupeptserver-code:/etc/puppetlabs/code
+      - puppetserver-code:/etc/puppetlabs/code
     extra_hosts:
       - "gitlab.example.com:192.168.10.50"
     environment:
