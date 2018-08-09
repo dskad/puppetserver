@@ -31,15 +31,15 @@ services:
       R10K_SOURCE1: "production,ssh://git@gitlab.example.com:2222/dan/prod-control-repo.git,false"
       R10K_SOURCE2: "puppet,ssh://git@gitlab.example.com:2222/dan/control-puppet.git"
 
-  puppetserver-agent:
-    image: puppetserver
-    restart: unless-stopped
-    depends_on:
-      - puppetserver
-    network_mode: service:puppetserver
-    volumes_from:
-      - puppetserver
-    command: puppet agent -v --no-daemonize --logdest console -w 30s
+  # puppetserver-agent:
+  #   image: puppetserver
+  #   restart: unless-stopped
+  #   depends_on:
+  #     - puppetserver
+  #   network_mode: service:puppetserver
+  #   volumes:
+  #     - pupeptserver-code:/etc/puppetlabs/code
+  #   command: puppet agent -v --no-daemonize --logdest console -w 30s
 
   # puppetserver-mcollective:
   #   image: puppetserver
