@@ -14,7 +14,7 @@ services:
     volumes:
       - puppetserver-code:/etc/puppetlabs/code
     extra_hosts:
-      - "gitlab.example.com:192.168.10.50"
+      - "gitlab.example.com:192.168.1.50"
     environment:
       PUPPET_RELEASE: "puppet5"
       # PUPPETSERVER_VERSION:
