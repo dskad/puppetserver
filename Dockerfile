@@ -64,9 +64,7 @@ COPY logback.xml /etc/puppetlabs/puppetserver/
 COPY request-logging.xml /etc/puppetlabs/puppetserver/
 
 ## Save the important stuff!
-VOLUME ["/etc/puppetlabs/code", \
-  "/etc/puppetlabs/ssh", \
-  "/opt/puppetlabs/server/data/puppetserver" ]
+VOLUME ["/etc/puppetlabs/code" ]
 
 # Run time defaults
 ENV DNS_ALT_NAMES="puppet,puppet.example.com"
@@ -93,5 +91,5 @@ HEALTHCHECK --interval=10s --timeout=10s --retries=90 CMD \
   --key    $(puppet config print hostprivkey) \
   --cacert $(puppet config print localcacert) \
   https://puppet:8140/${PUPPET_HEALTHCHECK_ENVIRONMENT}/status/test \
-  |  grep -q '"is_alive":true' \
-  || exit 1
+    | grep -q '"is_alive":true' \
+    ||exit 1
