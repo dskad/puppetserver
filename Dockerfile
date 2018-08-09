@@ -34,13 +34,14 @@ RUN set -exo pipefail && \
   # Install Ruby gems for R10k and hiera-eyaml
   /opt/puppetlabs/puppet/bin/gem install r10k -N ${R10k_VERSION:+--version }${R10k_VERSION} && \
   /opt/puppetlabs/puppet/bin/gem install hiera-eyaml -N ${HIERA_EYAML_VERSION:+--version }${HIERA_EYAML_VERSION} && \
+  mkdir /etc/puppetlabs/r10k && \
   \
   # Configure agent to use special environment
   puppet config set --section agent environment ${PUPPET_ADMIN_ENVIRONMENT} && \
   \
   # Setup paths for CA certificates (used when pulling from internal repo that is self or internal CA signed)
-  mkdir -p /etc/puppetlabs/git/certs/ca && \
-  git config --system http.sslCAPath /etc/puppetlabs/git/certs/ca && \
+  mkdir -p /etc/puppetlabs/git/ca && \
+  git config --system http.sslCAPath /etc/puppetlabs/git/ca && \
   \
   # Configure SSH to store keys in a location saved by volumes for R10k
   mkdir -p /etc/puppetlabs/ssh && \
@@ -63,7 +64,8 @@ COPY logback.xml /etc/puppetlabs/puppetserver/
 COPY request-logging.xml /etc/puppetlabs/puppetserver/
 
 ## Save the important stuff!
-VOLUME ["/etc/puppetlabs", \
+VOLUME ["/etc/puppetlabs/code", \
+  "/etc/puppetlabs/ssh", \
   "/opt/puppetlabs/server/data/puppetserver" ]
 
 # Run time defaults
@@ -72,6 +74,8 @@ ENV JAVA_ARGS="-Xms2g -Xmx2g"
 ENV PUPPET_HEALTHCHECK_ENVIRONMENT="production"
 # To enable jruby9 in puppet5, set JRUBY_JAR to "/opt/puppetlabs/server/apps/puppetserver/jruby-9k.jar"
 ENV JRUBY_JAR=
+ENV SSH_HOST_KEY_CHECK=true
+ENV TRUST_SSH_FIRST_CONNECT=true
 
 EXPOSE 8140
 
