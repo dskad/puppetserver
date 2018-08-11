@@ -18,6 +18,7 @@ ENV R10k_VERSION=
 ENV HIERA_EYAML_VERSION=
 
 COPY docker-entrypoint.sh /docker-entrypoint.sh
+COPY gen-ssh-keys.sh /gen-ssh-keys.sh
 
 RUN set -eo pipefail && if [[ -v DEBUG ]]; then set -x; fi && \
   # Import repository keys and add puppet repository
@@ -57,6 +58,7 @@ RUN set -eo pipefail && if [[ -v DEBUG ]]; then set -x; fi && \
   \
   # Cleanup
   chmod +x /docker-entrypoint.sh && \
+  chmod +x /gen-ssh-keys.sh && \
   yum clean all && \
   rm -rf /var/cache/yum
 
