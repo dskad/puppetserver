@@ -19,7 +19,7 @@ ENV HIERA_EYAML_VERSION=
 
 COPY docker-entrypoint.sh /docker-entrypoint.sh
 
-RUN set -exo pipefail && \
+RUN set -eo pipefail && if [[ -v DEBUG ]]; then set -x; fi && \
   # Import repository keys and add puppet repository
   rpm --import http://mirror.centos.org/centos/RPM-GPG-KEY-CentOS-7 \
   --import https://yum.puppetlabs.com/RPM-GPG-KEY-puppet && \
