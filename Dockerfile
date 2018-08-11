@@ -18,7 +18,7 @@ ENV R10k_VERSION=
 ENV HIERA_EYAML_VERSION=
 
 COPY docker-entrypoint.sh /docker-entrypoint.sh
-COPY gen-ssh-keys.sh /gen-ssh-keys.sh
+COPY gen-ssh-keys /gen-ssh-keys
 
 RUN set -eo pipefail && if [[ -v DEBUG ]]; then set -x; fi && \
   # Import repository keys and add puppet repository
@@ -58,7 +58,7 @@ RUN set -eo pipefail && if [[ -v DEBUG ]]; then set -x; fi && \
   \
   # Cleanup
   chmod +x /docker-entrypoint.sh && \
-  chmod +x /gen-ssh-keys.sh && \
+  chmod +x /gen-ssh-keys && \
   yum clean all && \
   rm -rf /var/cache/yum
 
@@ -75,8 +75,9 @@ ENV PUPPET_HEALTHCHECK_ENVIRONMENT="production"
 # To enable jruby9 in puppet5, set JRUBY_JAR to "/opt/puppetlabs/server/apps/puppetserver/jruby-9k.jar"
 ENV JRUBY_JAR=
 ENV SSH_HOST_KEY_CHECK=true
+ENV SHOW_SSH_KEY=false
 ENV TRUST_SSH_FIRST_CONNECT=true
-ENV R10K_ON_STARTUP=true
+ENV R10K_ON_STARTUP=false
 ENV R10K_SOURCE1="production,ssh://git@gitlab.example.com:2222/dan/prod-control-repo.git,false"
 ENV R10K_SOURCE2="puppet,ssh://git@gitlab.example.com:2222/dan/control-puppet.git"
 

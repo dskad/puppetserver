@@ -8,9 +8,11 @@ if [[ "$1" = "puppetserver" ]]; then
 
   # Generate SSH key pair for R10k if it doesn't exist
   if [[ ! -f  /etc/puppetlabs/ssh/id_rsa ]]; then
-    ssh-keygen -b 4096 -f /etc/puppetlabs/ssh/id_rsa -C "r10k-$(facter fqdn)" -t rsa -N ""
-    echo "SSH public key:"
-    cat /etc/puppetlabs/ssh/id_rsa.pub
+    ./gen-ssh-keys -n -c "r10k-$(facter fqdn)"
+    if [[ $SHOW_SSH_KEY = "true" ]]; then
+      echo "SSH public key:"
+      ./gen-ssh-keys -p
+    fi
   fi
 
   # Disable strict host checking in SSH if SSH_HOST_KEY_CHECK is false
