@@ -26,8 +26,9 @@ services:
       PUPPET_HEALTHCHECK_ENVIRONMENT: "production"
       # JRUBY_JAR:
       SSH_HOST_KEY_CHECK: "true"
+      SHOW_SSH_KEY: "true"
       TRUST_SSH_FIRST_CONNECT: "true"
-      R10K_ON_STARTUP: "true"
+      R10K_ON_STARTUP: "false"
       R10K_SOURCE1: "production,ssh://git@gitlab.example.com:2222/dan/prod-control-repo.git,false"
       R10K_SOURCE2: "puppet,ssh://git@gitlab.example.com:2222/dan/control-puppet.git"
 
