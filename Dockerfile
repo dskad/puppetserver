@@ -75,7 +75,7 @@ ENV PUPPET_HEALTHCHECK_ENVIRONMENT="production"
 # To enable jruby9 in puppet5, set JRUBY_JAR to "/opt/puppetlabs/server/apps/puppetserver/jruby-9k.jar"
 ENV JRUBY_JAR=
 ENV SSH_HOST_KEY_CHECK=true
-ENV SHOW_SSH_KEY=false
+ENV SHOW_SSH_KEY=true
 ENV TRUST_SSH_FIRST_CONNECT=true
 ENV R10K_ON_STARTUP=false
 ENV R10K_SOURCE1="production,ssh://git@gitlab.example.com:2222/dan/prod-control-repo.git,false"
@@ -87,7 +87,7 @@ EXPOSE 8140
 ENTRYPOINT ["/docker-entrypoint.sh"]
 CMD ["puppetserver", "foreground"]
 
-HEALTHCHECK --interval=10s --timeout=10s --retries=90 CMD \
+HEALTHCHECK --interval=30s --timeout=30s --retries=90 CMD \
   curl --fail -H 'Accept: pson' \
   --resolve 'puppet:8140:127.0.0.1' \
   --cert   $(puppet config print hostcert) \
