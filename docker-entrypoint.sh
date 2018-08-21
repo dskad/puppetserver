@@ -6,12 +6,18 @@ if [[ "$1" = "puppetserver" ]]; then
   # Point the server's puppet agent to this host
   puppet config set --section agent server $(facter hostname)
 
+  # Configure puppet to use a certificate autosign script (if it exists)
+  # AUTOSIGN=true|false|path_to_autosign.conf
+  if [[ -n "${AUTOSIGN}" ]] ; then
+    puppet config set autosign "$AUTOSIGN" --section master
+  fi
+
   # Generate SSH key pair for R10k if it doesn't exist
   if [[ ! -f  /etc/puppetlabs/ssh/id_rsa ]]; then
-    ./gen-ssh-keys -n -c "r10k-$(facter fqdn)"
+    gen-ssh-keys -n -c "r10k-$(facter fqdn)"
     if [[ $SHOW_SSH_KEY = "true" ]]; then
       echo "SSH public key:"
-      ./gen-ssh-keys -p
+      gen-ssh-keys -p
     fi
   fi
 

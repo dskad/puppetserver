@@ -12,9 +12,16 @@ services:
     networks:
       - puppetnet
     volumes:
-      - puppetserver-code:/etc/puppetlabs/code
-    extra_hosts:
-      - "gitlab.example.com:192.168.1.50"
+      - puppetserver-code: /etc/puppetlabs/code
+      - puppetserver-ssl: /etc/puppetlabs/puppet/ssl
+      - pupeptserver-ssh: /etc/puppetlabs/ssh
+      - puppetserver-ca: /etc/puppetlabs/git/ca
+      - pupeptserver-r10k-cache: /opt/puppetlabs/server/data/puppetserver/r10k
+      # - puppetserver-r10k-conf: /etc/puppetlabs/r10k/r10k.yaml
+      # - puppetserver-auth-conf: /etc/puppetlabs/puppetserver/conf.d/auth.conf
+      # - puppetserver-metrics-conf: /etc/puppetlabs/puppetserver/conf.d/metrics.conf
+      # - puppetserver-puppetserver-conf: /etc/puppetlabs/puppetserver/conf.d/puppetserver.conf
+      # - puppetserver-reports: /opt/puppetlabs/server/data/puppetserver/reports
     environment:
       PUPPET_RELEASE: "puppet5"
       # PUPPETSERVER_VERSION:
@@ -24,6 +31,7 @@ services:
       DNS_ALT_NAMES: "puppet,puppet.example.com"
       JAVA_ARGS: "-Xms2g -Xmx2g"
       PUPPET_HEALTHCHECK_ENVIRONMENT: "production"
+      AUTOSIGN: "true"
       # JRUBY_JAR:
       SSH_HOST_KEY_CHECK: "true"
       SHOW_SSH_KEY: "true"
@@ -31,7 +39,6 @@ services:
       R10K_ON_STARTUP: "false"
       R10K_SOURCE1: "production,ssh://git@gitlab.example.com:2222/dan/prod-control-repo.git,false"
       R10K_SOURCE2: "puppet,ssh://git@gitlab.example.com:2222/dan/control-puppet.git"
-
   # puppetserver-agent:
   #   image: puppetserver
   #   restart: unless-stopped
@@ -41,7 +48,6 @@ services:
   #   volumes:
   #     - pupeptserver-code:/etc/puppetlabs/code
   #   command: puppet agent -v --no-daemonize --logdest console -w 30s
-
   # puppetserver-mcollective:
   #   image: puppetserver
   #   restart: unless-stopped
@@ -52,7 +58,6 @@ services:
   #     - puppetserver
   #   command:
   #     mcollectived --config=/etc/puppetlabs/mcollective/server.cfg --no-daemonize
-
   # postgresdb:
   #   image: sameersbn/postgresql
   #   hostname: postgresdb.example.com
@@ -69,7 +74,6 @@ services:
   #     DB_EXTENSION: "pg_trgm"
   #   volumes:
   #     - postgres-data:/var/lib/postgresql
-
   # puppetdb:
   #   build:
   #     context: ../../docker-puppetdb
@@ -97,7 +101,6 @@ services:
   #     - puppetdb-cache:/opt/puppetlabs/puppet/cache
   #     - puppetdb-data:/opt/puppetlabs/server/data
   #     - puppetdb-logs:/var/log/puppetlabs
-
   # puppetdb-agent:
   #   image: puppetdb
   #   restart: unless-stopped
@@ -107,7 +110,6 @@ services:
   #   volumes_from:
   #     - puppetdb
   #   command: puppet agent -v --no-daemonize --logdest console -w 30s
-
   # puppetexplorer:
   #   image: puppetexplorer
   #   depends_on:
@@ -124,7 +126,6 @@ services:
   #     - puppetexplorer-conf:/etc/puppetlabs
   #     - puppetexplorer-cache:/opt/puppetlabs/puppet/cache
   #     - puppetexplorer-httpd_conf:/etc/httpd
-
   # puppetexplorer-agent:
   #   image: puppetexplorer
   #   restart: unless-stopped
@@ -134,7 +135,6 @@ services:
   #   volumes_from:
   #     - puppetexplorer
   #   command: puppet agent -v --no-daemonize --logdest console -w 30s
-
   # puppetboard:
   #   image: puppetboard
   #   depends_on:
@@ -150,7 +150,6 @@ services:
   #   volumes:
   #     - puppetboard-conf:/etc/puppetlabs
   #     - puppetboard-cache:/opt/puppetlabs/puppet/cache
-
   # puppetboard-agent:
   #   image: puppetboard
   #   restart: unless-stopped
@@ -160,7 +159,6 @@ services:
   #   volumes_from:
   #     - puppetboard
   #   command: puppet agent -v --no-daemonize --logdest console -w 30s
-
   # nats:
   #   image: choria-nats
   #   restart: unless-stopped
@@ -178,24 +176,19 @@ services:
   #     - nats-puppet-cache:/opt/puppetlabs/puppet/cache
 
 networks:
-  puppetnet:
+  ? puppetnet
 
 volumes:
-  puppetserver-code:
-
+  ? puppetserver-code
   # postgres-data:
-
   # puppetdb-conf:
   # puppetdb-cache:
   # puppetdb-data:
   # puppetdb-logs:
-
   # puppetexplorer-conf:
   # puppetexplorer-cache:
   # puppetexplorer-httpd_conf:
-
   # puppetboard-conf:
   # puppetboard-cache:
-
   # nats-puppet-conf:
   # nats-puppet-cache:

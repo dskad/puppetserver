@@ -18,7 +18,7 @@ ENV R10k_VERSION=
 ENV HIERA_EYAML_VERSION=
 
 COPY docker-entrypoint.sh /docker-entrypoint.sh
-COPY gen-ssh-keys /gen-ssh-keys
+COPY gen-ssh-keys /usr/local/bin/gen-ssh-keys
 
 RUN set -eo pipefail && if [[ -v DEBUG ]]; then set -x; fi && \
   # Import repository keys and add puppet repository
@@ -66,7 +66,7 @@ COPY logback.xml /etc/puppetlabs/puppetserver/
 COPY request-logging.xml /etc/puppetlabs/puppetserver/
 
 ## Save the important stuff!
-VOLUME ["/etc/puppetlabs/code" ]
+# VOLUME ["/etc/puppetlabs/code" ]
 
 # Run time defaults
 ENV DNS_ALT_NAMES="puppet,puppet.example.com"
@@ -75,11 +75,12 @@ ENV PUPPET_HEALTHCHECK_ENVIRONMENT="production"
 # To enable jruby9 in puppet5, set JRUBY_JAR to "/opt/puppetlabs/server/apps/puppetserver/jruby-9k.jar"
 ENV JRUBY_JAR=
 ENV SSH_HOST_KEY_CHECK=true
-ENV SHOW_SSH_KEY=true
-ENV TRUST_SSH_FIRST_CONNECT=true
+ENV SHOW_SSH_KEY=false
+ENV TRUST_SSH_FIRST_CONNECT=false
 ENV R10K_ON_STARTUP=false
-ENV R10K_SOURCE1="production,ssh://git@gitlab.example.com:2222/dan/prod-control-repo.git,false"
-ENV R10K_SOURCE2="puppet,ssh://git@gitlab.example.com:2222/dan/control-puppet.git"
+ENV R10K_SOURCE1=
+ENV R10K_SOURCE2=
+ENV AUTOSIGN=false
 
 
 EXPOSE 8140
@@ -94,5 +95,5 @@ HEALTHCHECK --interval=30s --timeout=30s --retries=90 CMD \
   --key    $(puppet config print hostprivkey) \
   --cacert $(puppet config print localcacert) \
   https://puppet:8140/${PUPPET_HEALTHCHECK_ENVIRONMENT}/status/test \
-    | grep -q '"is_alive":true' \
-    ||exit 1
+  | grep -q '"is_alive":true' \
+  ||exit 1
