@@ -12,11 +12,11 @@ services:
     networks:
       - puppetnet
     volumes:
-      - puppetserver-code: /etc/puppetlabs/code
-      - puppetserver-ssl: /etc/puppetlabs/puppet/ssl
-      - pupeptserver-ssh: /etc/puppetlabs/ssh
-      - puppetserver-ca: /etc/puppetlabs/git/ca
-      - pupeptserver-r10k-cache: /opt/puppetlabs/server/data/puppetserver/r10k
+      - puppetserver-code:/etc/puppetlabs/code
+      - puppetserver-ssl:/etc/puppetlabs/puppet/ssl
+      - pupeptserver-ssh:/etc/puppetlabs/ssh
+      - puppetserver-ca:/etc/puppetlabs/git/ca
+      - pupeptserver-r10k-cache:/opt/puppetlabs/server/data/puppetserver/r10k
       # - puppetserver-r10k-conf: /etc/puppetlabs/r10k/r10k.yaml
       # - puppetserver-auth-conf: /etc/puppetlabs/puppetserver/conf.d/auth.conf
       # - puppetserver-metrics-conf: /etc/puppetlabs/puppetserver/conf.d/metrics.conf
