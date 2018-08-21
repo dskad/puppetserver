@@ -176,10 +176,15 @@ services:
   #     - nats-puppet-cache:/opt/puppetlabs/puppet/cache
 
 networks:
-  ? puppetnet
+  puppetnet:
 
 volumes:
-  ? puppetserver-code
+  puppetserver-code:
+  puppetserver-ssl:
+  pupeptserver-ssh:
+  puppetserver-ca:
+  pupeptserver-r10k-cache:
+
   # postgres-data:
   # puppetdb-conf:
   # puppetdb-cache:
