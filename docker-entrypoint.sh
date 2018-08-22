@@ -12,6 +12,24 @@ if [[ "$1" = "puppetserver" ]]; then
     puppet config set autosign "$AUTOSIGN" --section master
   fi
 
+  puppet config set --section main dns_alt_names $(facter fqdn),$(facter hostname),$DNS_ALT_NAMES
+
+  if [[ "${DISABLE_CA_SERVER}" = "true" && "${EXTERNAL_CA_SERVER}" = "true" ]]; then
+    sed -i "s/^\([^#].*certificate-authority-service\)/#\1/" /etc/puppetlabs/puppetserver/services.d/ca.cfg
+    sed -i "s/^#\(.*certificate-authority-disabled-service\)/\1/" /etc/puppetlabs/puppetserver/services.d/ca.cfg
+     puppet config set --section main ca_server $EXTERNAL_CA_SERVER
+  fi
+
+  # Initialize CA if it doesn't exist. Usually on first startup
+  # TODO handle disabled CA
+  if [[ ! -d  /etc/puppetlabs/puppet/ssl/ca && ! "${DISABLE_CA_SERVER}" = "false" ]]; then
+    # Generate new CA certificate
+    puppet cert list -a -v
+
+    # Generate puppetserver host certificates named from the container hostname
+    puppet cert generate $(facter fqdn) -v
+  fi
+
   # Generate SSH key pair for R10k if it doesn't exist
   if [[ ! -f  /etc/puppetlabs/ssh/id_rsa ]]; then
     gen-ssh-keys -n -c "r10k-$(facter fqdn)"
@@ -24,16 +42,6 @@ if [[ "$1" = "puppetserver" ]]; then
   # Disable strict host checking in SSH if SSH_HOST_KEY_CHECK is false
   if [[ "$SSH_HOST_KEY_CHECK" = "false" ]]; then
     echo "StrictHostKeyChecking no" >> /etc/ssh/ssh_config
-  fi
-
-  # Initialize CA if it doesn't exist. Usually on first startup
-  # TODO handle disabled CA
-  if [[ ! -d  /etc/puppetlabs/puppet/ssl/ca ]]; then
-    # Generate new CA certificate
-    puppet cert list -a -v
-
-    # Generate puppetserver host certificates named from the container hostname
-    puppet cert generate $(facter fqdn) -v --dns_alt_names $(facter fqdn),$(facter hostname),$DNS_ALT_NAMES
   fi
 
   # If r10k.yaml doesn't exist, build the basic r10k config file

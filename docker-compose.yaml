@@ -31,7 +31,6 @@ services:
       DNS_ALT_NAMES: "puppet,puppet.example.com"
       JAVA_ARGS: "-Xms2g -Xmx2g"
       PUPPET_HEALTHCHECK_ENVIRONMENT: "production"
-      AUTOSIGN: "true"
       # JRUBY_JAR:
       SSH_HOST_KEY_CHECK: "true"
       SHOW_SSH_KEY: "true"
@@ -39,6 +38,8 @@ services:
       R10K_ON_STARTUP: "false"
       R10K_SOURCE1: "production,ssh://git@gitlab.example.com:2222/dan/prod-control-repo.git,false"
       R10K_SOURCE2: "puppet,ssh://git@gitlab.example.com:2222/dan/control-puppet.git"
+      AUTOSIGN: "true"
+      DISABLE_CA_SERVER: "true"
   # puppetserver-agent:
   #   image: puppetserver
   #   restart: unless-stopped

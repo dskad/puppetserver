@@ -17,9 +17,6 @@ ENV PUPPETSERVER_VERSION=
 ENV R10k_VERSION=
 ENV HIERA_EYAML_VERSION=
 
-COPY docker-entrypoint.sh /docker-entrypoint.sh
-COPY gen-ssh-keys /usr/local/bin/gen-ssh-keys
-
 RUN set -eo pipefail && if [[ -v DEBUG ]]; then set -x; fi && \
   # Import repository keys and add puppet repository
   rpm --import http://mirror.centos.org/centos/RPM-GPG-KEY-CentOS-7 \
@@ -40,6 +37,9 @@ RUN set -eo pipefail && if [[ -v DEBUG ]]; then set -x; fi && \
   # Configure agent to use special environment
   puppet config set --section agent environment ${PUPPET_ADMIN_ENVIRONMENT} && \
   \
+  # Set logs to display in container logs by default
+  puppet config set --section master reports log && \
+  \
   # Setup paths for CA certificates (used when pulling from internal repo that is self or internal CA signed)
   mkdir -p /etc/puppetlabs/git/ca && \
   git config --system http.sslCAPath /etc/puppetlabs/git/ca && \
@@ -56,14 +56,20 @@ RUN set -eo pipefail && if [[ -v DEBUG ]]; then set -x; fi && \
   # Fix 'puppetserver foreground' command so it can listen for signals from docker and exit gracefully
   sed -i "s/runuser \"/exec runuser \"/" /opt/puppetlabs/server/apps/puppetserver/cli/apps/foreground && \
   \
+  # Disable TLSv1 to be more secure
+  sed -ri 's/#?(ssl-protocols:.*)TLSv1, (.*)/\1\2/' /etc/puppetlabs/puppetserver/conf.d/puppetserver.conf && \
+  \
   # Cleanup
-  chmod +x /docker-entrypoint.sh && \
-  chmod +x /usr/local/bin/gen-ssh-keys && \
   yum clean all && \
   rm -rf /var/cache/yum
 
 COPY logback.xml /etc/puppetlabs/puppetserver/
 COPY request-logging.xml /etc/puppetlabs/puppetserver/
+COPY docker-entrypoint.sh /docker-entrypoint.sh
+COPY gen-ssh-keys /usr/local/bin/gen-ssh-keys
+
+RUN chmod +x /docker-entrypoint.sh && \
+  chmod +x /usr/local/bin/gen-ssh-keys
 
 ## Save the important stuff!
 # VOLUME ["/etc/puppetlabs/code" ]
@@ -73,15 +79,15 @@ ENV DNS_ALT_NAMES="puppet,puppet.example.com"
 ENV JAVA_ARGS="-Xms2g -Xmx2g"
 ENV PUPPET_HEALTHCHECK_ENVIRONMENT="production"
 # To enable jruby9 in puppet5, set JRUBY_JAR to "/opt/puppetlabs/server/apps/puppetserver/jruby-9k.jar"
-ENV JRUBY_JAR=
+# ENV JRUBY_JAR=
 ENV SSH_HOST_KEY_CHECK=true
 ENV SHOW_SSH_KEY=false
 ENV TRUST_SSH_FIRST_CONNECT=false
 ENV R10K_ON_STARTUP=false
-ENV R10K_SOURCE1=
-ENV R10K_SOURCE2=
-ENV AUTOSIGN=false
-
+# ENV R10K_SOURCE1=
+# ENV R10K_SOURCE2=
+# ENV AUTOSIGN=false
+ENV DISABLE_CA_SERVER=false
 
 EXPOSE 8140
 
