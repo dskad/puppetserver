@@ -14,10 +14,14 @@ if [[ "$1" = "puppetserver" ]]; then
 
   puppet config set --section main dns_alt_names $(facter fqdn),$(facter hostname),$DNS_ALT_NAMES
 
-  if [[ "${DISABLE_CA_SERVER}" = "true" && "${EXTERNAL_CA_SERVER}" = "true" ]]; then
+  # If the local CA server is disabled, configure the CA server host and port (optionally)
+  if [[ "${DISABLE_CA_SERVER}" = "true" && -n "${CA_SERVER}" ]]; then
     sed -i "s/^\([^#].*certificate-authority-service\)/#\1/" /etc/puppetlabs/puppetserver/services.d/ca.cfg
     sed -i "s/^#\(.*certificate-authority-disabled-service\)/\1/" /etc/puppetlabs/puppetserver/services.d/ca.cfg
-     puppet config set --section main ca_server $EXTERNAL_CA_SERVER
+    puppet config set --section main ca_server "${CA_SERVER}"
+    if [[ -n "${CA_PORT}" ]]; then
+      puppet config set --section main ca_port "${CA_PORT}"
+    fi
   fi
 
   # Initialize CA if it doesn't exist. Usually on first startup
@@ -51,7 +55,7 @@ if [[ "$1" = "puppetserver" ]]; then
     # If R10k sources are supplied via R10K_SOURCE* environment variables, add them to the r10k config file
     env -0 | while IFS='=' read -r -d '' NAME VALUE; do
       # looping through each R10K_SOURCE variables (R10K_SOURCE1, R10K_SOURCE2, etc)
-      if [[ $NAME =~ R10K_SOURCE\n*  ]]; then
+      if [[ $NAME =~ R10K_SOURCE\n* && -n "${VALUE}" ]]; then
         IFS=',' read -ra SOURCE <<< "$VALUE"
 
         echo -e "  ${SOURCE[0]}:\n    remote: ${SOURCE[1]}" >>/etc/puppetlabs/r10k/r10k.yaml
