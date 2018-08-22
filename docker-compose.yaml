@@ -39,7 +39,9 @@ services:
       R10K_SOURCE1: "production,ssh://git@gitlab.example.com:2222/dan/prod-control-repo.git,false"
       R10K_SOURCE2: "puppet,ssh://git@gitlab.example.com:2222/dan/control-puppet.git"
       AUTOSIGN: "true"
-      DISABLE_CA_SERVER: "true"
+      DISABLE_CA_SERVER: "false"
+      EXTERNAL_CA_SERVER: "puppetca.example.com"
+
   # puppetserver-agent:
   #   image: puppetserver
   #   restart: unless-stopped
