@@ -58,7 +58,7 @@ RUN set -eo pipefail && if [[ -v DEBUG ]]; then set -x; fi && \
   \
   # Cleanup
   chmod +x /docker-entrypoint.sh && \
-  chmod +x /gen-ssh-keys && \
+  chmod +x /usr/local/bin/gen-ssh-keys && \
   yum clean all && \
   rm -rf /var/cache/yum
 
