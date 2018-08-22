@@ -26,7 +26,7 @@ if [[ "$1" = "puppetserver" ]]; then
 
   # Initialize CA if it doesn't exist. Usually on first startup
   # TODO handle disabled CA
-  if [[ ! -d  /etc/puppetlabs/puppet/ssl/ca && ! "${DISABLE_CA_SERVER}" = "false" ]]; then
+  if [[ ! -d  /etc/puppetlabs/puppet/ssl/ca && ! "${DISABLE_CA_SERVER}" = "true" ]]; then
     # Generate new CA certificate
     puppet cert list -a -v
 
