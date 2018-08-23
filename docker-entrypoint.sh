@@ -22,6 +22,17 @@ if [[ "$1" = "puppetserver" ]]; then
     if [[ -n "${CA_PORT}" ]]; then
       puppet config set --section main ca_port "${CA_PORT}"
     fi
+    # get the local cert signed and import ca certs from master
+    puppet agent -t -v --waitforcert 30s
+
+    # Update puppetserver webserver.conf to point to certificates from puppet run. This is was not well documented
+    # When no CA is setup, puppetserver won't run without ssl-crl-path set, if that is set, the others have to be set
+    sed -i '/}/d' /etc/puppetlabs/puppetserver/conf.d/webserver.conf
+    echo "    ssl-cert: $(puppet config print hostcert --section master)" >> /etc/puppetlabs/puppetserver/conf.d/webserver.conf
+    echo "    ssl-key: $(puppet config print hostprivkey --section master)" >> /etc/puppetlabs/puppetserver/conf.d/webserver.conf
+    echo "    ssl-ca-cert: $(puppet config print localcacert --section master)" >> /etc/puppetlabs/puppetserver/conf.d/webserver.conf
+    echo "    ssl-crl-path: $(puppet config print hostcrl --section master)" >> /etc/puppetlabs/puppetserver/conf.d/webserver.conf
+    echo "}" >> /etc/puppetlabs/puppetserver/conf.d/webserver.conf
   fi
 
   # Initialize CA if it doesn't exist. Usually on first startup
