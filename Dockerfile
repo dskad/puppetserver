@@ -4,7 +4,6 @@ LABEL maintainer="dskadra@gmail.com"
 
 ENV PATH="$PATH:/opt/puppetlabs/bin:/opt/puppetlabs/puppet/bin:/opt/puppetlabs/server/bin"
 ENV FACTER_CONTAINER_ROLE="puppetserver"
-ENV PUPPET_ADMIN_ENVIRONMENT="puppet_admin"
 
 ## Current available releases: puppet5, puppet5-nightly, puppet6-nightly
 ENV PUPPET_RELEASE="puppet5"
@@ -33,9 +32,6 @@ RUN set -eo pipefail && if [[ -v DEBUG ]]; then set -x; fi && \
   /opt/puppetlabs/puppet/bin/gem install r10k -N ${R10k_VERSION:+--version }${R10k_VERSION} && \
   /opt/puppetlabs/puppet/bin/gem install hiera-eyaml -N ${HIERA_EYAML_VERSION:+--version }${HIERA_EYAML_VERSION} && \
   mkdir /etc/puppetlabs/r10k && \
-  \
-  # Configure agent to use special environment
-  puppet config set --section agent environment ${PUPPET_ADMIN_ENVIRONMENT} && \
   \
   # Set logs to display in container logs by default
   puppet config set --section master reports log && \
@@ -75,11 +71,15 @@ RUN chmod +x /docker-entrypoint.sh && \
 # VOLUME ["/etc/puppetlabs/code" ]
 
 # Run time defaults
-ENV DNS_ALT_NAMES="puppet,puppet.example.com"
-ENV JAVA_ARGS="-Xms2g -Xmx2g"
-ENV PUPPET_HEALTHCHECK_ENVIRONMENT="production"
 # To enable jruby9 in puppet5, set JRUBY_JAR to "/opt/puppetlabs/server/apps/puppetserver/jruby-9k.jar"
-# ENV JRUBY_JAR=
+ENV JRUBY_JAR=
+ENV JAVA_ARGS="-Xms2g -Xmx2g"
+ENV CERTNAME=puppet.example.com
+ENV DNS_ALT_NAMES="puppet,puppet.example.com"
+ENV AGENT_ENVIRONMENT=production
+ENV HEALTHCHECK_ENVIRONMENT="production"
+ENV SERVER=puppet
+ENV MASTERPORT=
 ENV SSH_HOST_KEY_CHECK=true
 ENV SHOW_SSH_KEY=false
 ENV TRUST_SSH_FIRST_CONNECT=false
@@ -102,6 +102,6 @@ HEALTHCHECK --interval=30s --timeout=30s --retries=90 CMD \
   --cert   $(puppet config print hostcert) \
   --key    $(puppet config print hostprivkey) \
   --cacert $(puppet config print localcacert) \
-  https://${HOSTNAME}:8140/${PUPPET_HEALTHCHECK_ENVIRONMENT}/status/test \
+  https://${HOSTNAME}:8140/${HEALTHCHECK_ENVIRONMENT}/status/test \
   | grep -q '"is_alive":true' \
   ||exit 1

@@ -3,8 +3,25 @@ set -eo pipefail
 if [[ -v DEBUG ]]; then set -x; fi
 
 if [[ "$1" = "puppetserver" ]]; then
-  # Point the server's puppet agent to this host
-  puppet config set --section agent server $(facter hostname)
+  # Point the server's puppet agent to SERVER or this host's hostname
+  if [[ -n "${SERVER}" ]]; then
+    puppet config set --section agent server ${SERVER}
+  else
+    puppet config set --section agent server $(facter hostname)
+  fi
+
+  # Set this for the agent to talk to a puppet master on a different port
+  if [[ -n "${MASTERPORT}" ]]; then
+    puppet config set --section agent masterport ${MASTERPORT}
+  fi
+
+  # Manually set a cert name, default is the container's fqdn/hash. (it's different every run!)
+  if [[ -n "${CERTNAME}"]]; then
+    puppet config set --section main certname ${CERTNAME}
+  fi
+
+  # environment to configure this container
+  puppet config set --section agent environment ${AGENT_ENVIRONMENT}
 
   # Configure puppet to use a certificate autosign script (if it exists)
   # AUTOSIGN=true|false|path_to_autosign.conf
@@ -21,9 +38,21 @@ if [[ "$1" = "puppetserver" ]]; then
     puppet config set --section main ca_server "${CA_SERVER}"
     if [[ -n "${CA_PORT}" ]]; then
       puppet config set --section main ca_port "${CA_PORT}"
+    else
+      $CA_PORT=8140
     fi
-    # get the local cert signed and import ca certs from master
-    puppet agent -t -v --waitforcert 30s
+
+    # Not using puppet agent here because we don't want to do a full puppet run yet.
+    #   Environments might not be set up yet
+
+    # Import the CA certs from the master
+    puppet certificate find --ca-location remote ca -v
+
+    # Get the local cert signed and import ca certs from master
+    # TODO verify the alt-dns-names error doesn't stop the script  use "|| true"
+    puppet certificate generate --ca-location remote $(puppet config print certname) -v
+
+    # puppet agent -t -v --waitforcert 30s --environment production --server ${CA_SERVER} --masterport ${MASTERPORT}
 
     # Update puppetserver webserver.conf to point to certificates from puppet run. This is was not well documented
     # When no CA is setup, puppetserver won't run without ssl-crl-path set, if that is set, the others have to be set
@@ -41,8 +70,12 @@ if [[ "$1" = "puppetserver" ]]; then
     # Generate new CA certificate
     puppet cert list -a -v
 
-    # Generate puppetserver host certificates named from the container hostname
-    puppet cert generate $(facter fqdn) -v
+    # Generate a self signed cert named from the container hostname or CERTNAME
+    if [[ -n "${CERTNAME}" ]]; then
+      puppet cert generate $(puppet config print certname) -v
+    else
+      puppet cert generate $(facter fqdn) -v
+    fi
   fi
 
   # Generate SSH key pair for R10k if it doesn't exist
@@ -79,7 +112,7 @@ if [[ "$1" = "puppetserver" ]]; then
 
         # If SSH host key checking and auto trust is turned on, connect to source and add host key
         if [[ "$SSH_HOST_KEY_CHECK" = "true" && "$TRUST_SSH_FIRST_CONNECT" = "true" ]]; then
-          # Parse the url for the remote
+          # Parse the R10K_SOURCE# url for the remote
           shopt -s nocasematch
           pattern='^(([[:alnum:]]+)://)?((([[:alnum:]]+)(:?([[:alnum:]]+)?))@)?([^:^@^/]+)(:([[:digit:]]+))?(/.*)'
           if [[ ${SOURCE[1]} =~ $pattern ]]; then
