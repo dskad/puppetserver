@@ -16,7 +16,7 @@ if [[ "$1" = "puppetserver" ]]; then
   fi
 
   # Manually set a cert name, default is the container's fqdn/hash. (it's different every run!)
-  if [[ -n "${CERTNAME}"]]; then
+  if [[ -n "${CERTNAME}" ]]; then
     puppet config set --section main certname ${CERTNAME}
   fi
 
