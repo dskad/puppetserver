@@ -26,6 +26,7 @@ if [[ "$1" = "puppetserver" ]]; then
   # Configure puppet to use a certificate autosign script (if it exists)
   # AUTOSIGN=true|false|path_to_autosign.conf
   if [[ -n "${AUTOSIGN}" ]] ; then
+    # TODO depricated
     puppet config set autosign "$AUTOSIGN" --section master
   fi
 
@@ -38,21 +39,9 @@ if [[ "$1" = "puppetserver" ]]; then
     puppet config set --section main ca_server "${CA_SERVER}"
     if [[ -n "${CA_PORT}" ]]; then
       puppet config set --section main ca_port "${CA_PORT}"
-    else
-      $CA_PORT=8140
     fi
 
-    # Not using puppet agent here because we don't want to do a full puppet run yet.
-    #   Environments might not be set up yet
-
-    # Import the CA certs from the master
-    puppet certificate find --ca-location remote ca -v
-
-    # Get the local cert signed and import ca certs from master
-    # TODO verify the alt-dns-names error doesn't stop the script  use "|| true"
-    puppet certificate generate --ca-location remote $(puppet config print certname) -v
-
-    # puppet agent -t -v --waitforcert 30s --environment production --server ${CA_SERVER} --masterport ${MASTERPORT}
+    puppet agent -t -v --noop --server ${CA_SERVER} --masterport ${CA_PORT} --environment production --waitforcert 30s
 
     # Update puppetserver webserver.conf to point to certificates from puppet run. This is was not well documented
     # When no CA is setup, puppetserver won't run without ssl-crl-path set, if that is set, the others have to be set
@@ -62,20 +51,6 @@ if [[ "$1" = "puppetserver" ]]; then
     echo "    ssl-ca-cert: $(puppet config print localcacert --section master)" >> /etc/puppetlabs/puppetserver/conf.d/webserver.conf
     echo "    ssl-crl-path: $(puppet config print hostcrl --section master)" >> /etc/puppetlabs/puppetserver/conf.d/webserver.conf
     echo "}" >> /etc/puppetlabs/puppetserver/conf.d/webserver.conf
-  fi
-
-  # Initialize CA if it doesn't exist. Usually on first startup
-  # TODO handle disabled CA
-  if [[ ! -d  /etc/puppetlabs/puppet/ssl/ca && ! "${DISABLE_CA_SERVER}" = "true" ]]; then
-    # Generate new CA certificate
-    puppet cert list -a -v
-
-    # Generate a self signed cert named from the container hostname or CERTNAME
-    if [[ -n "${CERTNAME}" ]]; then
-      puppet cert generate $(puppet config print certname) -v
-    else
-      puppet cert generate $(facter fqdn) -v
-    fi
   fi
 
   # Generate SSH key pair for R10k if it doesn't exist
