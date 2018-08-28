@@ -62,6 +62,23 @@ if [[ "$1" = "puppetserver" ]]; then
     fi
   fi
 
+  # Configure for puppetdb if PUPPETDB_SERVER_URLS is set
+  if [[ -n "$PUPPETDB_SERVER_URLS" ]]; then
+    echo "[main]" > /etc/puppetlabs/puppet/puppetdb.conf
+    echo "server_urls = ${PUPPETDB_SERVER_URLS}" >> /etc/puppetlabs/puppet/puppetdb.conf
+
+    puppet config set --section master storeconfigs true
+    puppet config set --section master storeconfigs_backend puppetdb
+
+    sed -i "s/\(reports = .*\)/\1,puppetdb/" /etc/puppetlabs/puppet/puppet.conf
+
+    echo "---" > /etc/puppetlabs/puppet/routes.yaml
+    echo "master:" >> /etc/puppetlabs/puppet/routes.yaml
+    echo "  facts:" >> /etc/puppetlabs/puppet/routes.yaml
+    echo "    terminus: puppetdb" >> /etc/puppetlabs/puppet/routes.yaml
+    echo "    cache: yaml" >> /etc/puppetlabs/puppet/routes.yaml
+  fi
+
   # Disable strict host checking in SSH if SSH_HOST_KEY_CHECK is false
   if [[ "$SSH_HOST_KEY_CHECK" = "false" ]]; then
     echo "StrictHostKeyChecking no" >> /etc/ssh/ssh_config

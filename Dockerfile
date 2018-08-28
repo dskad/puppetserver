@@ -26,7 +26,8 @@ RUN set -eo pipefail && if [[ -v DEBUG ]]; then set -x; fi && \
   yum -y update && \
   yum -y install \
   git \
-  puppetserver${PUPPETSERVER_VERSION:+-}${PUPPETSERVER_VERSION} && \
+  puppetserver${PUPPETSERVER_VERSION:+-}${PUPPETSERVER_VERSION} \
+  puppetdb-termini && \
   \
   # Install Ruby gems for R10k and hiera-eyaml
   /opt/puppetlabs/puppet/bin/gem install r10k -N ${R10k_VERSION:+--version }${R10k_VERSION} && \
@@ -56,6 +57,7 @@ RUN set -eo pipefail && if [[ -v DEBUG ]]; then set -x; fi && \
   sed -ri 's/#?(ssl-protocols:.*)TLSv1, (.*)/\1\2/' /etc/puppetlabs/puppetserver/conf.d/puppetserver.conf && \
   \
   # Cleanup
+  chown -R puppet:puppet $(puppet config print confdir) && \
   yum clean all && \
   rm -rf /var/cache/yum
 
@@ -90,6 +92,7 @@ ENV AUTOSIGN=
 ENV DISABLE_CA_SERVER=false
 ENV CA_SERVER=
 ENV CA_PORT=
+ENV PUPPETDB_SERVER_URLS=
 
 EXPOSE 8140
 
