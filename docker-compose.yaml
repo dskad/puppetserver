@@ -33,7 +33,7 @@ services:
       DNS_ALT_NAMES: "puppet,puppet.example.com"
       AGENT_ENVIRONMENT: "production"
       PUPPET_HEALTHCHECK_ENVIRONMENT: "production"
-      SERVER: "${HOSTNAME}"
+      # SERVER: "${HOSTNAME}"
       # MASTERPORT: "8140"
       SSH_HOST_KEY_CHECK: "true"
       SHOW_SSH_KEY: "true"
