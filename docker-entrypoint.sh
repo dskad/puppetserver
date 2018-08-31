@@ -142,7 +142,9 @@ if [[ "$1" = "puppetserver" ]]; then
   fi
 
   # Apply current config for this instance. Volumes retain config across container restarts
-  # puppet apply /etc/puppetlabs/code/environments/puppet/manifests/site.pp -v
+  if [[ "${RUN_PUPPET_AGENT_ON_START}" = "true" ]]; then
+    puppet apply /etc/puppetlabs/code/environments/${AGENT_ENVIRONMENT}/manifests/site.pp -v
+  fi
 fi
 
 ## Pass control on to the command supplied on the CMD line of the Dockerfile
