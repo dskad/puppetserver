@@ -74,25 +74,26 @@ RUN chmod +x /docker-entrypoint.sh && \
 
 # Run time defaults
 # To enable jruby9 in puppet5, set JRUBY_JAR to "/opt/puppetlabs/server/apps/puppetserver/jruby-9k.jar"
-ENV JRUBY_JAR=
+# ENV JRUBY_JAR="/opt/puppetlabs/server/apps/puppetserver/jruby-9k.jar"
 ENV JAVA_ARGS="-Xms2g -Xmx2g"
-ENV CERTNAME=puppet.example.com
 ENV DNS_ALT_NAMES="puppet,puppet.example.com"
 ENV AGENT_ENVIRONMENT=production
 ENV HEALTHCHECK_ENVIRONMENT="production"
-ENV SERVER=puppet
-ENV MASTERPORT=
-ENV SSH_HOST_KEY_CHECK=true
-ENV SHOW_SSH_KEY=false
-ENV TRUST_SSH_FIRST_CONNECT=false
-ENV R10K_ON_STARTUP=false
-ENV R10K_SOURCE1=
-ENV R10K_SOURCE2=
-ENV AUTOSIGN=
-ENV DISABLE_CA_SERVER=false
-ENV CA_SERVER=
-ENV CA_PORT=
-ENV PUPPETDB_SERVER_URLS=
+# ENV CERTNAME=puppet.example.com
+# ENV SERVER=puppet
+# ENV MASTERPORT=8140
+# ENV SSH_HOST_KEY_CHECK=false
+# ENV SHOW_SSH_KEY=false
+# ENV TRUST_SSH_FIRST_CONNECT=false
+# ENV R10K_ON_STARTUP=false
+# ENV R10K_SOURCE1=
+# ENV R10K_SOURCE2=
+# ENV AUTOSIGN=true
+# ENV DISABLE_CA_SERVER=false
+# ENV CA_SERVER=
+# ENV CA_PORT=
+# ENV PUPPETDB_SERVER_URLS=http://puppetdb.example.com
+# ENV RUN_PUPPET_AGENT_ON_START=false
 
 EXPOSE 8140
 
