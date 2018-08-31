@@ -26,8 +26,7 @@ if [[ "$1" = "puppetserver" ]]; then
   # Configure puppet to use a certificate autosign script (if it exists)
   # AUTOSIGN=true|false|path_to_autosign.conf
   if [[ -n "${AUTOSIGN}" ]] ; then
-    # TODO depricated
-    puppet config set autosign "$AUTOSIGN" --section master
+    echo "*" > /etc/puppetlabs/puppet/autosign.conf
   fi
 
   puppet config set --section main dns_alt_names $(facter fqdn),$(facter hostname),$DNS_ALT_NAMES
