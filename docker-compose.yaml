@@ -11,7 +11,7 @@ services:
       - "8140:8140"
     networks:
       - puppetnet
-    # volumes:
+    volumes:
       - puppet-code:/etc/puppetlabs/code
       - puppet-ssl:/etc/puppetlabs/puppet/ssl
       - puppet-ssh:/etc/puppetlabs/ssh
