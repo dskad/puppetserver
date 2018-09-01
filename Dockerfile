@@ -65,6 +65,7 @@ COPY logback.xml /etc/puppetlabs/puppetserver/
 COPY request-logging.xml /etc/puppetlabs/puppetserver/
 COPY docker-entrypoint.sh /docker-entrypoint.sh
 COPY gen-ssh-keys /usr/local/bin/gen-ssh-keys
+COPY refresh-env-cache /usr/local/bin/refresh-env-cache
 
 RUN chmod +x /docker-entrypoint.sh && \
   chmod +x /usr/local/bin/gen-ssh-keys

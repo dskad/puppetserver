@@ -1,0 +1,26 @@
+#!/bin/bash
+
+# Note: This server must be on the puppetserver.conf whitelist to be able to call this command
+#       This is to be used when setting environment_timeout to unlimited
+
+hostcert=$(puppet config print hostcert)
+hostkey=$(puppet config print hostprivkey)
+cacert=$(puppet config print localcacert)
+masterport=$(puppet config print masterport)
+
+
+if [[ $# -eq 0 ]]; then
+  curl -i --cert ${hostcert} --key ${hostkey} --cacert ${cacert} \
+    --resolve "${HOSTNAME}:8140:127.0.0.1" \
+    -X DELETE https://${HOSTNAME}:${masterport}/puppet-admin-api/v1/environment-cache
+else
+  curl -i --cert ${hostcert} --key ${hostkey} --cacert ${cacert} \
+    -X DELETE https://localhost:${masterport}/puppet-admin-api/v1/environment-cache?environment=${1}
+fi
+
+  curl --fail -H 'Accept: pson' \
+  --resolve "${HOSTNAME}:8140:127.0.0.1" \
+  --cert   $(puppet config print hostcert) \
+  --key    $(puppet config print hostprivkey) \
+  --cacert $(puppet config print localcacert) \
+  https://${HOSTNAME}:8140/${HEALTHCHECK_ENVIRONMENT}/status/test
