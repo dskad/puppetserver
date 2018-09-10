@@ -4,7 +4,7 @@ set -eo pipefail
 usage () {
 cat << EOF
 Description:
-  $0 is a wraper script to generate a SSH key pair to be used in conjunction with git and
+  $0 is a wrapper script to generate a SSH key pair to be used in conjunction with git and
   R10k when connecting to a remote git repository. It is designed to be easily called from
   the docker command line to generate the keys and print the public key that can be installed
   on the repository. See the puppetserver documentation for more details
@@ -13,11 +13,11 @@ Usage:
  $0 [options]
 
 Options
- -n, --new-key                Generate new ssh keypair
+ -n, --new-key                Generate new ssh key pair
  -k, --key-dir <directory>    Custom output directory (default: /etc/puppetlabs/ssh)
  -c, --key-comment <comment>  Add custom comment to generated key  (default user@host)
  -f, --force                  Overwrite existing keys
- -p, --print-pub-key          Print public key of generated keypair
+ -p, --print-pub-key          Print public key of generated key pair
  -h, --help                   Show usage information
 
 $0 will not overwrite existing keys. To regenerate a new key pair, delete the original keys first
