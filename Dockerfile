@@ -47,9 +47,6 @@ RUN set -eo pipefail && if [[ -v DEBUG ]]; then set -x; fi && \
   echo "IdentityFile /etc/puppetlabs/ssh/id_rsa" >> /etc/ssh/ssh_config && \
   echo "GlobalKnownHostsFile /etc/puppetlabs/ssh/known_hosts" >> /etc/ssh/ssh_config && \
   \
-  # Update puppetserver configs to use JAVA_ARGS variable to configure java runtime
-  sed "s/JAVA_ARGS=.*$/JAVA_ARGS=\"\$JAVA_ARGS\"/" /etc/sysconfig/puppetserver > /etc/default/puppetserver && \
-  \
   # Fix 'puppetserver foreground' command so it can listen for signals from docker and exit gracefully
   sed -i "s/runuser \"/exec runuser \"/" /opt/puppetlabs/server/apps/puppetserver/cli/apps/foreground && \
   \
@@ -76,8 +73,8 @@ RUN chmod +x /docker-entrypoint.sh && \
 # Run time defaults
 # To enable jruby9 in puppet5, set JRUBY_JAR to "/opt/puppetlabs/server/apps/puppetserver/jruby-9k.jar"
 # ENV JRUBY_JAR="/opt/puppetlabs/server/apps/puppetserver/jruby-9k.jar"
-ENV JAVA_ARGS="-Xms2g -Xmx2g"
-ENV DNS_ALT_NAMES="puppet,puppet.example.com"
+ENV JAVA_ARGS="-Xms2g -Xmx2g -Djruby.logger.class=com.puppetlabs.jruby_utils.jruby.Slf4jLogger"
+ENV DNS_ALT_NAMES="puppet,puppet.localhost"
 ENV AGENT_ENVIRONMENT=production
 ENV HEALTHCHECK_ENVIRONMENT="production"
 # ENV CERTNAME=puppet.example.com

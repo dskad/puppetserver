@@ -3,6 +3,11 @@ set -eo pipefail
 if [[ -v DEBUG ]]; then set -x; fi
 
 if [[ "$1" = "puppetserver" ]]; then
+  if [[ -n "${JAVA_ARGS}" ]]; then
+    # Update puppetserver configs to use JAVA_ARGS variable to configure java runtime
+    sed -i "s/JAVA_ARGS=.*$/JAVA_ARGS=\"\$JAVA_ARGS\"/" /etc/sysconfig/puppetserver
+  fi
+
   # Point the server's puppet agent to SERVER or this host's hostname
   if [[ -n "${SERVER}" ]]; then
     puppet config set --section agent server ${SERVER}
