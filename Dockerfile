@@ -5,8 +5,8 @@ LABEL maintainer="dskadra@gmail.com"
 ENV PATH="$PATH:/opt/puppetlabs/bin:/opt/puppetlabs/puppet/bin:/opt/puppetlabs/server/bin"
 ENV FACTER_CONTAINER_ROLE="puppetserver"
 
-## Current available releases: puppet5, puppet5-nightly, puppet6-nightly
-ENV PUPPET_RELEASE="puppet5"
+## Current available releases: puppet5, puppet5-nightly, puppet6, puppet6-nightly
+ENV PUPPET_RELEASE="puppet6"
 
 ## Latest by default, un-comment to pin specific versions or supply with -e PUPPETSERVER_VERSION
 ## Example:
@@ -19,8 +19,8 @@ ENV HIERA_EYAML_VERSION=
 RUN set -eo pipefail && if [[ -v DEBUG ]]; then set -x; fi && \
   # Import repository keys and add puppet repository
   rpm --import http://mirror.centos.org/centos/RPM-GPG-KEY-CentOS-7 \
-  --import https://yum.puppetlabs.com/RPM-GPG-KEY-puppet && \
-  rpm -Uvh https://yum.puppetlabs.com/${PUPPET_RELEASE}/${PUPPET_RELEASE}-release-el-7.noarch.rpm && \
+  --import https://yum.puppet.com/RPM-GPG-KEY-puppet && \
+  rpm -Uvh https://yum.puppet.com/${PUPPET_RELEASE}/${PUPPET_RELEASE}-release-el-7.noarch.rpm && \
   \
   # Update and install stuff
   yum -y update && \
@@ -28,6 +28,10 @@ RUN set -eo pipefail && if [[ -v DEBUG ]]; then set -x; fi && \
   git \
   puppetserver${PUPPETSERVER_VERSION:+-}${PUPPETSERVER_VERSION} \
   puppetdb-termini && \
+  \
+  # Install dumb-init
+  curl -Lo /usr/local/bin/dumb-init https://github.com/Yelp/dumb-init/releases/download/v1.2.2/dumb-init_1.2.2_amd64 && \
+  chmod +x /usr/local/bin/dumb-init && \
   \
   # Install Ruby gems for R10k and hiera-eyaml
   /opt/puppetlabs/puppet/bin/gem install r10k -N ${R10k_VERSION:+--version }${R10k_VERSION} && \
@@ -95,7 +99,7 @@ ENV HEALTHCHECK_ENVIRONMENT="production"
 
 EXPOSE 8140
 
-ENTRYPOINT ["/docker-entrypoint.sh"]
+ENTRYPOINT ["dumb-init", "/docker-entrypoint.sh"]
 CMD ["puppetserver", "foreground"]
 
 HEALTHCHECK --interval=30s --timeout=30s --retries=90 CMD \
