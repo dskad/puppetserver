@@ -2,7 +2,7 @@
 set -eo pipefail
 if [[ -v DEBUG ]]; then set -x; fi
 
-if [[ "$1" = "puppetserver" ]]; then
+if [[ "$2" = "foreground" ]]; then
   if [[ -n "${JAVA_ARGS}" ]]; then
     # Update puppetserver configs to use JAVA_ARGS variable to configure java runtime
     sed -i "s/JAVA_ARGS=.*$/JAVA_ARGS=\"\$JAVA_ARGS\"/" /etc/sysconfig/puppetserver
