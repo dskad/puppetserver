@@ -3,10 +3,8 @@ set -eo pipefail
 if [[ -v DEBUG ]]; then set -x; fi
 
 if [[ "$2" = "foreground" ]]; then
-  if [[ -n "${JAVA_ARGS}" ]]; then
-    # Update puppetserver configs to use JAVA_ARGS variable to configure java runtime
-    sed -i "s/JAVA_ARGS=.*$/JAVA_ARGS=\"\$JAVA_ARGS\"/" /etc/sysconfig/puppetserver
-  fi
+  # Update puppetserver configs to use JAVA_ARGS variable to configure java runtime
+  [ -n "${JAVA_ARGS}" ] && sed -i "s/JAVA_ARGS=.*$/JAVA_ARGS=\"\$JAVA_ARGS\"/" /etc/sysconfig/puppetserver
 
   # Point the server's puppet agent to SERVER or this host's hostname
   if [[ -n "${SERVER}" ]]; then
@@ -16,22 +14,18 @@ if [[ "$2" = "foreground" ]]; then
   fi
 
   # Set this for the agent to talk to a puppet master on a different port
-  if [[ -n "${MASTERPORT}" ]]; then
-    puppet config set --section agent masterport ${MASTERPORT}
-  fi
+  [ -n "${MASTERPORT}" ] && puppet config set --section agent masterport ${MASTERPORT}
 
   # Manually set a cert name, default is the container's fqdn/hash. (it's different every run!)
-  if [[ -n "${CERTNAME}" ]]; then
-    puppet config set --section main certname ${CERTNAME}
-  fi
+  [ -n "${CERTNAME}" ] && puppet config set --section main certname ${CERTNAME}
 
   # environment to configure this container
   puppet config set --section agent environment ${AGENT_ENVIRONMENT}
 
-  # Configure puppet to use a certificate autosign script (if it exists)
-  # AUTOSIGN=true|false|path_to_autosign.conf
+  # Enable basic autosigning
   if [[ -n "${AUTOSIGN}" ]] ; then
     echo "*" > /etc/puppetlabs/puppet/autosign.conf
+    chown puppet.puppet /etc/puppetlabs/puppet/autosign.conf
   fi
 
   puppet config set --section main dns_alt_names $(facter fqdn),$(facter hostname),$DNS_ALT_NAMES
@@ -73,8 +67,7 @@ if [[ "$2" = "foreground" ]]; then
 
     puppet config set --section master storeconfigs true
     puppet config set --section master storeconfigs_backend puppetdb
-
-    sed -i "s/\(reports = .*\)/\1,puppetdb/" /etc/puppetlabs/puppet/puppet.conf
+    puppet config set --section master reports logs,puppetdb
 
     echo "---" > /etc/puppetlabs/puppet/routes.yaml
     echo "master:" >> /etc/puppetlabs/puppet/routes.yaml

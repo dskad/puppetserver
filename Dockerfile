@@ -15,6 +15,7 @@ ENV PUPPET_RELEASE="puppet6"
 ENV PUPPETSERVER_VERSION=
 ENV R10k_VERSION=
 ENV HIERA_EYAML_VERSION=
+ENV DUMB_INIT_VERSION=1.2.2
 
 RUN set -eo pipefail && if [[ -v DEBUG ]]; then set -x; fi && \
   # Import repository keys and add puppet repository
@@ -25,12 +26,12 @@ RUN set -eo pipefail && if [[ -v DEBUG ]]; then set -x; fi && \
   # Update and install stuff
   yum -y update && \
   yum -y install \
-  git \
-  puppetserver${PUPPETSERVER_VERSION:+-}${PUPPETSERVER_VERSION} \
-  puppetdb-termini && \
+    git \
+    puppetserver${PUPPETSERVER_VERSION:+-}${PUPPETSERVER_VERSION} \
+    puppetdb-termini && \
   \
   # Install dumb-init
-  curl -Lo /usr/local/bin/dumb-init https://github.com/Yelp/dumb-init/releases/download/v1.2.2/dumb-init_1.2.2_amd64 && \
+  curl -Lo /usr/local/bin/dumb-init https://github.com/Yelp/dumb-init/releases/download/v${DUMB_INIT_VERSION}/dumb-init_${DUMB_INIT_VERSION}_amd64 && \
   chmod +x /usr/local/bin/dumb-init && \
   \
   # Install Ruby gems for R10k and hiera-eyaml
@@ -52,7 +53,7 @@ RUN set -eo pipefail && if [[ -v DEBUG ]]; then set -x; fi && \
   echo "GlobalKnownHostsFile /etc/puppetlabs/ssh/known_hosts" >> /etc/ssh/ssh_config && \
   \
   # Fix 'puppetserver foreground' command so it can listen for signals from docker and exit gracefully
-  sed -i "s/runuser \"/exec runuser \"/" /opt/puppetlabs/server/apps/puppetserver/cli/apps/foreground && \
+  # sed -i "s/runuser \"/exec runuser \"/" /opt/puppetlabs/server/apps/puppetserver/cli/apps/foreground && \
   \
   # Disable TLSv1 to be more secure
   sed -ri 's/#?(ssl-protocols:.*)TLSv1, (.*)/\1\2/' /etc/puppetlabs/puppetserver/conf.d/puppetserver.conf && \
@@ -72,7 +73,9 @@ RUN chmod +x /docker-entrypoint.sh && \
   chmod +x /usr/local/bin/gen-ssh-keys
 
 ## Save the important stuff!
-# VOLUME ["/etc/puppetlabs/code" ]
+VOLUME ["/etc/puppetlabs/code", \
+        "/etc/puppetlabs/puppet/ssl", \
+        "/etc/puppetlabs/ssh" ]
 
 # Run time defaults
 # To enable jruby9 in puppet5, set JRUBY_JAR to "/opt/puppetlabs/server/apps/puppetserver/jruby-9k.jar"
