@@ -85,6 +85,7 @@ ENV DNS_ALT_NAMES="puppet,puppet.localhost"
 ENV AGENT_ENVIRONMENT="production"
 ENV HEALTHCHECK_ENVIRONMENT="production"
 ENV PUPPETDB_SERVER_URLS="https://puppetdb:8081"
+ENV SOFT_WRITE_FAILURES = "true"
 # ENV CERTNAME=puppet.example.com
 # ENV SERVER=puppet
 # ENV MASTERPORT=8140

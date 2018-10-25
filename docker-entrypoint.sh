@@ -64,7 +64,7 @@ if [[ "$2" = "foreground" ]]; then
   if [[ -n "${PUPPETDB_SERVER_URLS}" ]]; then
     echo "[main]" > /etc/puppetlabs/puppet/puppetdb.conf
     echo "server_urls = ${PUPPETDB_SERVER_URLS}" >> /etc/puppetlabs/puppet/puppetdb.conf
-    echo "soft_write_failure = true" >> /etc/puppetlabs/puppet/puppetdb.conf
+    echo "soft_write_failure = ${SOFT_WRITE_FAILURES}" >> /etc/puppetlabs/puppet/puppetdb.conf
 
     puppet config set --section master storeconfigs true
     puppet config set --section master storeconfigs_backend puppetdb
