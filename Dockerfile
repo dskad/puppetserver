@@ -82,8 +82,9 @@ VOLUME ["/etc/puppetlabs/code", \
 # ENV JRUBY_JAR="/opt/puppetlabs/server/apps/puppetserver/jruby-9k.jar"
 ENV JAVA_ARGS="-Xms2g -Xmx2g -Djruby.logger.class=com.puppetlabs.jruby_utils.jruby.Slf4jLogger"
 ENV DNS_ALT_NAMES="puppet,puppet.localhost"
-ENV AGENT_ENVIRONMENT=production
+ENV AGENT_ENVIRONMENT="production"
 ENV HEALTHCHECK_ENVIRONMENT="production"
+ENV PUPPETDB_SERVER_URLS="https://puppetdb:8081"
 # ENV CERTNAME=puppet.example.com
 # ENV SERVER=puppet
 # ENV MASTERPORT=8140
@@ -97,7 +98,6 @@ ENV HEALTHCHECK_ENVIRONMENT="production"
 # ENV DISABLE_CA_SERVER=false
 # ENV CA_SERVER=
 # ENV CA_PORT=
-# ENV PUPPETDB_SERVER_URLS=http://puppetdb.example.com
 # ENV RUN_PUPPET_AGENT_ON_START=false
 
 EXPOSE 8140
