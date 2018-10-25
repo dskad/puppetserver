@@ -184,6 +184,7 @@ services:
 
 networks:
   puppetnet:
+    external: true
 
 volumes:
   puppet-code:
