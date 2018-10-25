@@ -105,7 +105,7 @@ if [[ "$2" = "foreground" ]]; then
           # Parse the R10K_SOURCE# url for the remote
           shopt -s nocasematch
           pattern='^(([[:alnum:]]+)://)?((([[:alnum:]]+)(:?([[:alnum:]]+)?))@)?([^:^@^/]+)(:([[:digit:]]+))?(/.*)'
-          if [ ${SOURCE[1]} =~ ${pattern} ]; then
+          if [[ ${SOURCE[1]} =~ ${pattern} ]]; then
             protocol=${BASH_REMATCH[2]}
             user=${BASH_REMATCH[5]}
             password=${BASH_REMATCH[7]}
