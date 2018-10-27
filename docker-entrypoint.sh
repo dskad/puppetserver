@@ -22,7 +22,7 @@ if [[ "$2" = "foreground" ]]; then
   # environment to configure this container
   puppet config set --section agent environment ${AGENT_ENVIRONMENT}
 
-  # Enable basic autosigning
+  # Enable basic autosigning. More advanced auto signing should mount via volume
   if [[ -n "${AUTOSIGN}" ]] ; then
     echo "*" > /etc/puppetlabs/puppet/autosign.conf
     chown puppet.puppet /etc/puppetlabs/puppet/autosign.conf
@@ -30,15 +30,23 @@ if [[ "$2" = "foreground" ]]; then
 
   puppet config set --section main dns_alt_names $(facter fqdn),$(facter hostname),$DNS_ALT_NAMES
 
+  # To allow infrastructure scaling like compile masters and puppetdb clusters
+  # TODO investigate server code to see if this can be done in autosign.conf or other code chage instead of globally
+  If [[ -n "${ENABLE_DNS_ALT_NAME_SIGNING}" ]]; then
+    sed -i "s/#\?\s\+allow-subject-alt-names.*/allow-subject-alt-names: true/" /etc/puppetlabs/puppetserver/conf.d/ca.conf
+  fi
+
   # If the local CA server is disabled, configure the CA server host and port (optionally)
-  if [[ "${DISABLE_CA_SERVER}" = "true" && -n "${CA_SERVER}" ]]; then
+  if [[ -n "${CA_SERVER}" ]]; then
+    # Disable CA
     sed -i "s/^\([^#].*certificate-authority-service\)/#\1/" /etc/puppetlabs/puppetserver/services.d/ca.cfg
     sed -i "s/^#\(.*certificate-authority-disabled-service\)/\1/" /etc/puppetlabs/puppetserver/services.d/ca.cfg
+    # Set CA server and port, if port isn't provided, roll with the default
     puppet config set --section main ca_server "${CA_SERVER}"
     if [[ -n "${CA_PORT}" ]]; then
       puppet config set --section main ca_port "${CA_PORT}"
     fi
-
+    # get the CA server to sign our cert, force prod environment in case this server is set to use some other env
     puppet agent -t -v --noop --server ${CA_SERVER} --masterport ${CA_PORT} --environment production --waitforcert 30s
 
     # Update puppetserver webserver.conf to point to certificates from puppet run. This is was not well documented
