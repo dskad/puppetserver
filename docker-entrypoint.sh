@@ -32,7 +32,7 @@ if [[ "$2" = "foreground" ]]; then
 
   # To allow infrastructure scaling like compile masters and puppetdb clusters
   # TODO investigate server code to see if this can be done in autosign.conf or other code chage instead of globally
-  If [[ -n "${ENABLE_DNS_ALT_NAME_SIGNING}" ]]; then
+  if [[ -n "${ENABLE_DNS_ALT_NAME_SIGNING}" ]]; then
     sed -i "s/#\?\s\+allow-subject-alt-names.*/allow-subject-alt-names: true/" /etc/puppetlabs/puppetserver/conf.d/ca.conf
   fi
 
