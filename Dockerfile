@@ -66,6 +66,7 @@ RUN set -eo pipefail && if [[ -v DEBUG ]]; then set -x; fi && \
 COPY logback.xml /etc/puppetlabs/puppetserver/
 COPY request-logging.xml /etc/puppetlabs/puppetserver/
 COPY docker-entrypoint.sh /docker-entrypoint.sh
+COPY healthcheck.sh /healthcheck.sh
 COPY gen-ssh-keys /usr/local/bin/gen-ssh-keys
 COPY refresh-env-cache /usr/local/bin/refresh-env-cache
 
@@ -85,33 +86,27 @@ ENV DNS_ALT_NAMES="puppet,puppet.localhost"
 ENV AGENT_ENVIRONMENT="production"
 ENV HEALTHCHECK_ENVIRONMENT="production"
 ENV SOFT_WRITE_FAILURE="true"
-# ENV ENABLE_DNS_ALT_NAME_SIGNING="true"
-# ENV PUPPETDB_SERVER_URLS="https://puppetdb:8081"
-# ENV CERTNAME=puppet.example.com
+ENV ENABLE_DNS_ALT_NAME_SIGNING="true"
+# ENV CERTNAME=<hostname>
 # ENV SERVER=puppet
 # ENV MASTERPORT=8140
-# ENV SSH_HOST_KEY_CHECK=false
+# ENV AUTOSIGN=false
+# ENV CA_SERVER=
+# ENV CA_PORT=
+# ENV ENVIRONMENT_TIMEOUT=0
+# ENV PUPPETDB_SERVER_URLS="https://puppetdb:8081"
 # ENV SHOW_SSH_KEY=false
+# ENV SSH_HOST_KEY_CHECK=true
 # ENV TRUST_SSH_FIRST_CONNECT=false
 # ENV R10K_ON_STARTUP=false
 # ENV R10K_SOURCE1=
 # ENV R10K_SOURCE2=
-# ENV AUTOSIGN=true
-# ENV CA_SERVER=
-# ENV CA_PORT=
 # ENV RUN_PUPPET_AGENT_ON_START=false
+# ENV DEBUG=
 
 EXPOSE 8140
 
 ENTRYPOINT ["dumb-init", "/docker-entrypoint.sh"]
 CMD ["puppetserver", "foreground"]
 
-HEALTHCHECK --interval=30s --timeout=30s --retries=90 CMD \
-  curl --fail -H 'Accept: pson' \
-  --resolve "${HOSTNAME}:8140:127.0.0.1" \
-  --cert   $(puppet config print hostcert) \
-  --key    $(puppet config print hostprivkey) \
-  --cacert $(puppet config print localcacert) \
-  https://${HOSTNAME}:8140/${HEALTHCHECK_ENVIRONMENT}/status/test \
-  | grep -q '"is_alive":true' \
-  ||exit 1
+HEALTHCHECK --interval=30s --timeout=30s --retries=90 CMD ["/healthcheck.sh"]

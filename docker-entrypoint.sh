@@ -31,12 +31,12 @@ if [[ "$2" = "foreground" ]]; then
   puppet config set --section main dns_alt_names $(facter fqdn),$(facter hostname),$DNS_ALT_NAMES
 
   # To allow infrastructure scaling like compile masters and puppetdb clusters
-  # TODO investigate server code to see if this can be done in autosign.conf or other code chage instead of globally
+  # TODO investigate server code to see if this can be done in autosign.config or other code change instead of globally
   if [[ -n "${ENABLE_DNS_ALT_NAME_SIGNING}" ]]; then
     sed -i "s/#\?\s\+allow-subject-alt-names.*/allow-subject-alt-names: true/" /etc/puppetlabs/puppetserver/conf.d/ca.conf
   fi
 
-  # If the local CA server is disabled, configure the CA server host and port (optionally)
+  # If CA server is supplied, disable the local CA and configure the CA server host and port (optionally)
   if [[ -n "${CA_SERVER}" ]]; then
     # Disable CA
     sed -i "s/^\([^#].*certificate-authority-service\)/#\1/" /etc/puppetlabs/puppetserver/services.d/ca.cfg
@@ -52,20 +52,11 @@ if [[ "$2" = "foreground" ]]; then
     # Update puppetserver webserver.conf to point to certificates from puppet run. This is was not well documented
     # When no CA is setup, puppetserver won't run without ssl-crl-path set, if that is set, the others have to be set
     sed -i '/}/d' /etc/puppetlabs/puppetserver/conf.d/webserver.conf
-    echo "    ssl-cert: $(puppet config print hostcert --section master)" >> /etc/puppetlabs/puppetserver/conf.d/webserver.conf
-    echo "    ssl-key: $(puppet config print hostprivkey --section master)" >> /etc/puppetlabs/puppetserver/conf.d/webserver.conf
-    echo "    ssl-ca-cert: $(puppet config print localcacert --section master)" >> /etc/puppetlabs/puppetserver/conf.d/webserver.conf
-    echo "    ssl-crl-path: $(puppet config print hostcrl --section master)" >> /etc/puppetlabs/puppetserver/conf.d/webserver.conf
+    echo "    ssl-cert: $(puppet config print hostcert)" >> /etc/puppetlabs/puppetserver/conf.d/webserver.conf
+    echo "    ssl-key: $(puppet config print hostprivkey)" >> /etc/puppetlabs/puppetserver/conf.d/webserver.conf
+    echo "    ssl-ca-cert: $(puppet config print localcacert)" >> /etc/puppetlabs/puppetserver/conf.d/webserver.conf
+    echo "    ssl-crl-path: $(puppet config print hostcrl)" >> /etc/puppetlabs/puppetserver/conf.d/webserver.conf
     echo "}" >> /etc/puppetlabs/puppetserver/conf.d/webserver.conf
-  fi
-
-  # Generate SSH key pair for R10k if it doesn't exist
-  if [[ ! -f  /etc/puppetlabs/ssh/id_rsa ]]; then
-    gen-ssh-keys -n -c "r10k-$(facter fqdn)"
-    if [[ ${SHOW_SSH_KEY} = "true" ]]; then
-      echo "SSH public key:"
-      gen-ssh-keys -p
-    fi
   fi
 
   # Configure for puppetdb if PUPPETDB_SERVER_URLS is set
@@ -85,13 +76,22 @@ if [[ "$2" = "foreground" ]]; then
     echo "    cache: yaml" >> /etc/puppetlabs/puppet/routes.yaml
   fi
 
+  # Generate SSH key pair for R10k if it doesn't exist
+  if [[ ! -f  /etc/puppetlabs/ssh/id_rsa ]]; then
+    gen-ssh-keys -n -c "r10k-$(facter fqdn)"
+    if [[ ${SHOW_SSH_KEY} = "true" ]]; then
+      echo "SSH public key:"
+      gen-ssh-keys -p
+    fi
+  fi
+
   # Disable strict host checking in SSH if SSH_HOST_KEY_CHECK is false
   if [[ "${SSH_HOST_KEY_CHECK}" = "false" ]]; then
     echo "StrictHostKeyChecking no" >> /etc/ssh/ssh_config
   fi
 
-  # If r10k.yaml doesn't exist, build the basic r10k config file
-  if [[ ! -f /etc/puppetlabs/r10k/r10k.yaml ]]; then
+  # If r10k.yaml doesn't exist, and source url(s) are supplied, build the basic r10k config file
+  if [[ ! -f /etc/puppetlabs/r10k/r10k.yaml ]] && (env | grep -q R10K_SOURCE); then
     echo -e "---\n:cachedir: /opt/puppetlabs/server/data/puppetserver/r10k\n\n:sources:" > /etc/puppetlabs/r10k/r10k.yaml
 
     # If R10k sources are supplied via R10K_SOURCE* environment variables, add them to the r10k config file
