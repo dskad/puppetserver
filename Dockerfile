@@ -70,8 +70,11 @@ COPY healthcheck.sh /healthcheck.sh
 COPY gen-ssh-keys /usr/local/bin/gen-ssh-keys
 COPY refresh-env-cache /usr/local/bin/refresh-env-cache
 
-RUN chmod +x /docker-entrypoint.sh && \
-  chmod +x /usr/local/bin/gen-ssh-keys
+RUN chmod +x \
+      /docker-entrypoint.sh \
+      /healthcheck.sh \
+      /usr/local/bin/gen-ssh-keys \
+      /usr/local/bin/refresh-env-cache
 
 ## Save the important stuff!
 VOLUME ["/etc/puppetlabs/code", \
