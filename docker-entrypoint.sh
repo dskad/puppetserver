@@ -47,7 +47,12 @@ if [[ "$2" = "foreground" ]]; then
       puppet config set --section main ca_port "${CA_PORT}"
     fi
     # get the CA server to sign our cert, force prod environment in case this server is set to use some other env
-    puppet agent -t -v --noop --server ${CA_SERVER} --masterport ${CA_PORT} --environment production --waitforcert 30s
+    puppet agent \
+      --verbose \
+      --no-daemonize \
+      --onetime \
+      --noop \
+      --server ${CA_SERVER} --masterport ${CA_PORT} --environment production --waitforcert 30s
 
     # Update puppetserver webserver.conf to point to certificates from puppet run. This is was not well documented
     # When no CA is setup, puppetserver won't run without ssl-crl-path set, if that is set, the others have to be set
