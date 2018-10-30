@@ -23,11 +23,6 @@ services:
       # - puppetserver-puppetserver-conf: /etc/puppetlabs/puppetserver/conf.d/puppetserver.conf
       # - puppetserver-reports: /opt/puppetlabs/server/data/puppetserver/reports
     environment:
-      #PUPPET_RELEASE: "puppet5"
-      # PUPPETSERVER_VERSION:
-      # R10k_VERSION:
-      # HIERA_EYAML_VERSION:
-      # JRUBY_JAR:
       # JAVA_ARGS: "-Xms2g -Xmx2g"
       CERTNAME: "puppet.example.com"
       #DNS_ALT_NAMES: "puppet,puppet.example.com"
