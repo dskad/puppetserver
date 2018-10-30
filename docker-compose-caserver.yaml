@@ -82,6 +82,8 @@ services:
       PUPPETDB_DATABASE_USER: "puppetdb"
       PUPPETDB_DATABASE_PASSWORD: "puppetdb"
       PUPPETDB_JAVA_ARGS: "-Xmx192m"
+      CA_SERVER: puppetca.example.com
+      CA_PORT: "8141"
     ports:
       - "8081:8081"
       - "9999:8080"
