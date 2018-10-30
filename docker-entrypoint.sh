@@ -46,7 +46,14 @@ if [[ "$2" = "foreground" ]]; then
     puppet config set --section main ca_server "${CA_SERVER}"
     if [[ -n "${CA_PORT}" ]]; then
       puppet config set --section main ca_port "${CA_PORT}"
+    else
+      CA_PORT=$(puppet config print ca_port)
     fi
+
+    while ! (echo > /dev/tcp/${CA_SERVER}/${CA_PORT}) >/dev/null 2>&1; do
+      echo 'Waiting for puppet server to become available...'
+      sleep 10
+    done
 
     # get the CA server to sign our cert, force prod environment in case this server is set to use some other env
     puppet agent \
@@ -54,8 +61,8 @@ if [[ "$2" = "foreground" ]]; then
       --no-daemonize \
       --onetime \
       --noop \
-      --server $(puppet config print ca_server) \
-      --masterport $(puppet config print ca_port) \
+      --server ${CA_SERVER} \
+      --masterport ${CA_PORT} \
       --environment production \
       --waitforcert 30s
 
@@ -167,6 +174,7 @@ if [[ "$2" = "foreground" ]]; then
   if [[ "${RUN_PUPPET_AGENT_ON_START}" = "true" ]]; then
     puppet apply /etc/puppetlabs/code/environments/${AGENT_ENVIRONMENT}/manifests/site.pp -v
   fi
+  echo 'Starting puppet server...'
 fi
 
 ## Pass control on to the command supplied on the CMD line of the Dockerfile
