@@ -88,7 +88,7 @@ if [[ "$2" = "foreground" ]]; then
 
   # Generate SSH key pair for R10k if it doesn't exist
   if [[ ! -f  /etc/puppetlabs/ssh/id_rsa ]]; then
-    gen-ssh-keys -n -c "r10k-$(facter fqdn)"
+    gen-ssh-keys -n -c "$(facter fqdn)"
     if [[ ${SHOW_SSH_KEY} = "true" ]]; then
       echo "SSH public key:"
       gen-ssh-keys -p
