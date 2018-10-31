@@ -31,12 +31,12 @@ services:
   puppet:
     build: .
     image: puppetserver:latest
-    hostname: puppet.example.com
+    #hostname: puppet.example.com
     restart: unless-stopped
     devices:
       - "/dev/urandom:/dev/urandom"
-    ports:
-      - "8140:8140"
+      #    ports:
+      #- "8140:8140"
     networks:
       - puppetnet
       - postgres_db
@@ -52,9 +52,9 @@ services:
       # - puppetserver-puppetserver-conf: /etc/puppetlabs/puppetserver/conf.d/puppetserver.conf
       # - puppetserver-reports: /opt/puppetlabs/server/data/puppetserver/reports
     environment:
-      CERTNAME: "puppet.example.com"
+      #CERTNAME: "puppet.example.com"
       DNS_ALT_NAMES: "puppet,puppet.example.com"
-      AGENT_ENVIRONMENT: "production"
+      #AGENT_ENVIRONMENT: "production"
       # SSH_HOST_KEY_CHECK: "true"
       # SHOW_SSH_KEY: "true"
       # TRUST_SSH_FIRST_CONNECT: "true"
@@ -63,8 +63,9 @@ services:
       # R10K_SOURCE2: "puppet,ssh://git@gitlab.example.com:2222/dan/control-puppet.git"
       # AUTOSIGN: "true"
       DISABLE_CA_SERVER: "true"
-      CA_SERVER: puppetca.example.com
-      CA_PORT: "8141"
+      CA_SERVER: puppetca
+      CA_PORT: "8140"
+      PUPPETDB_SERVER_URLS: "https://puppetdb:8081"
 
   puppetdb:
     build: .
@@ -77,13 +78,14 @@ services:
           - puppetdb.example.com
       postgres_db:
     environment:
-      PUPPETDB_DATABASE_SERVER: "db"
       CERTNAME: "puppetdb.example.com"
+      DNS_ALT_NAMES: "puppetdb,puppetdb.example.com"
+      PUPPETDB_DATABASE_SERVER: "db"
       PUPPETDB_DATABASE_USER: "puppetdb"
       PUPPETDB_DATABASE_PASSWORD: "puppetdb"
       PUPPETDB_JAVA_ARGS: "-Xmx192m"
-      CA_SERVER: puppetca.example.com
-      CA_PORT: "8141"
+      CA_SERVER: puppetca
+      CA_PORT: "8140"
     ports:
       - "8081:8081"
       - "9999:8080"
