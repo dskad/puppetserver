@@ -89,10 +89,14 @@ ENV HEALTHCHECK_ENVIRONMENT="production"
 ENV SOFT_WRITE_FAILURE="true"
 ENV ENABLE_DNS_ALT_NAME_SIGNING="true"
 ENV AUTOSIGN=true
+ENV HEALTHCHECK_INTERVAL="30s"
+ENV HEALTHCHECK_TIMEOUT="30s"
+ENV HEALTHCHECK_RETRIES="10"
+ENV HEALTHCHECK_START_PERIOD="5m"
 
 EXPOSE 8140
 
 ENTRYPOINT ["dumb-init", "/docker-entrypoint.sh"]
 CMD ["puppetserver", "foreground"]
 
-HEALTHCHECK --interval=30s --timeout=30s --retries=90 CMD ["/healthcheck.sh"]
+HEALTHCHECK --interval=${HEALTHCHECK_INTERVAL} --timeout=${HEALTHCHECK_TIMEOUT} --retries=${HEALTHCHECK_RETRIES} --start-period=${HEALTHCHECK_START_PERIOD} CMD ["/healthcheck.sh"]
