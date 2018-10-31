@@ -94,5 +94,3 @@ EXPOSE 8140
 
 ENTRYPOINT ["dumb-init", "/docker-entrypoint.sh"]
 CMD ["puppetserver", "foreground"]
-
-HEALTHCHECK --interval=30s --timeout=30s --retries=10 --start-period=5m CMD ["/healthcheck.sh"]
