@@ -13,7 +13,6 @@ services:
       puppetnet:
         aliases:
           - puppet.example.com
-        postgres_db:
     volumes:
       - puppetserver-code:/etc/puppetlabs/code
       - puppetserver-ssl:/etc/puppetlabs/puppet/ssl
