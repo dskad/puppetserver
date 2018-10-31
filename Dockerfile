@@ -5,13 +5,13 @@ LABEL maintainer="dskadra@gmail.com"
 ENV PATH="$PATH:/opt/puppetlabs/bin:/opt/puppetlabs/puppet/bin:/opt/puppetlabs/server/bin"
 ENV FACTER_CONTAINER_ROLE="puppetserver"
 
-## Current available releases: puppet5, puppet5-nightly, puppet6, puppet6-nightly
+# Current available releases: puppet5, puppet5-nightly, puppet6, puppet6-nightly
 ENV PUPPET_RELEASE="puppet6"
 
-## Latest by default, un-comment to pin specific versions or supply with -e PUPPETSERVER_VERSION
-## Example:
-## ENV PUPPETSERVER_VERSION="5.3.*"
-## ENV PUPPETSERVER_VERSION="5.3.4"
+# Latest by default, un-comment to pin specific versions or supply with -e PUPPETSERVER_VERSION
+# Example:
+# ENV PUPPETSERVER_VERSION="5.3.*"
+# ENV PUPPETSERVER_VERSION="5.3.4"
 ENV PUPPETSERVER_VERSION=
 ENV R10k_VERSION=
 ENV HIERA_EYAML_VERSION=
@@ -76,14 +76,12 @@ RUN chmod +x \
       /usr/local/bin/gen-ssh-keys \
       /usr/local/bin/refresh-env-cache
 
-## Save the important stuff!
+# Save the important stuff!
 VOLUME ["/etc/puppetlabs/code", \
         "/etc/puppetlabs/puppet/ssl", \
         "/etc/puppetlabs/ssh" ]
 
-# Run time defaults
-# To enable jruby9 in puppet5, set JRUBY_JAR to "/opt/puppetlabs/server/apps/puppetserver/jruby-9k.jar"
-# ENV JRUBY_JAR="/opt/puppetlabs/server/apps/puppetserver/jruby-9k.jar"
+# Configuration defaults
 ENV JAVA_ARGS="-Xms2g -Xmx2g -Djruby.logger.class=com.puppetlabs.jruby_utils.jruby.Slf4jLogger"
 ENV DNS_ALT_NAMES="puppet,puppet.localhost"
 ENV AGENT_ENVIRONMENT="production"
@@ -91,21 +89,6 @@ ENV HEALTHCHECK_ENVIRONMENT="production"
 ENV SOFT_WRITE_FAILURE="true"
 ENV ENABLE_DNS_ALT_NAME_SIGNING="true"
 ENV AUTOSIGN=true
-# ENV CERTNAME=<hostname>
-# ENV SERVER=puppet
-# ENV MASTERPORT=8140
-# ENV CA_SERVER=
-# ENV CA_PORT=
-# ENV ENVIRONMENT_TIMEOUT=0
-# ENV PUPPETDB_SERVER_URLS="https://puppetdb:8081"
-# ENV SHOW_SSH_KEY=false
-# ENV SSH_HOST_KEY_CHECK=true
-# ENV TRUST_SSH_FIRST_CONNECT=false
-# ENV R10K_ON_STARTUP=false
-# ENV R10K_SOURCE1=
-# ENV R10K_SOURCE2=
-# ENV RUN_PUPPET_AGENT_ON_START=false
-# ENV DEBUG=
 
 EXPOSE 8140
 
