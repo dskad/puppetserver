@@ -7,6 +7,6 @@ curl -sS --fail -H 'Accept: pson' \
   --cert   /etc/puppetlabs/puppet/ssl/certs/${certname}.pem \
   --key    /etc/puppetlabs/puppet/ssl/private_keys/${certname}.pem \
   --cacert /etc/puppetlabs/puppet/ssl/certs/ca.pem \
-  https://${certname}:8140/${HEALTHCHECK_ENVIRONMENT}/status/test \
-  | grep -q '"is_alive":true' \
-  ||exit 1
+  https://${certname}:8140/${HEALTHCHECK_ENVIRONMENT}/status/test | \
+  grep -q '"is_alive":true' || \
+  exit 1

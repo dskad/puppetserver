@@ -50,7 +50,7 @@ if [[ "$2" = "foreground" ]]; then
       CA_PORT=$(puppet config print ca_port)
     fi
 
-    while ! (echo > /dev/tcp/${CA_SERVER}/${CA_PORT}) >/dev/null 2>&1; do
+    while ! $(echo > /dev/tcp/${CA_SERVER}/${CA_PORT}) >/dev/null 2>&1; do
       echo 'Waiting for puppet server to become available...'
       sleep 10
     done
