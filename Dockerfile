@@ -68,7 +68,7 @@ RUN set -eo pipefail && if [[ -v DEBUG ]]; then set -x; fi && \
 # COPY refresh-env-cache /usr/local/bin/refresh-env-cache
 COPY config /etc/puppetlabs/puppetserver/
 COPY docker-helper /
-COPY bin /usr/local/bin/refresh-env-cache
+COPY bin /usr/local/bin/
 
 RUN chmod +x \
       /docker-entrypoint.sh \
