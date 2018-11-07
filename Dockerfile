@@ -2,20 +2,20 @@ FROM centos:7
 
 LABEL maintainer="dskadra@gmail.com"
 
-ENV PATH="$PATH:/opt/puppetlabs/bin:/opt/puppetlabs/puppet/bin:/opt/puppetlabs/server/bin"
-ENV FACTER_CONTAINER_ROLE="puppetserver"
+ENV PATH="$PATH:/opt/puppetlabs/bin:/opt/puppetlabs/puppet/bin:/opt/puppetlabs/server/bin" \
+    FACTER_CONTAINER_ROLE="puppetserver"
 
 # Current available releases: puppet5, puppet5-nightly, puppet6, puppet6-nightly
-ENV PUPPET_RELEASE="puppet6"
+ARG PUPPET_RELEASE="puppet6"
 
 # Latest by default, un-comment to pin specific versions or supply with -e PUPPETSERVER_VERSION
 # Example:
 # ENV PUPPETSERVER_VERSION="5.3.*"
 # ENV PUPPETSERVER_VERSION="5.3.4"
-ENV PUPPETSERVER_VERSION=
-ENV R10k_VERSION=
-ENV HIERA_EYAML_VERSION=
-ENV DUMB_INIT_VERSION=1.2.2
+ARG PUPPETSERVER_VERSION
+ARG R10k_VERSION
+ARG HIERA_EYAML_VERSION
+ARG DUMB_INIT_VERSION="1.2.2"
 
 RUN set -eo pipefail && if [[ -v DEBUG ]]; then set -x; fi && \
   # Import repository keys and add puppet repository
@@ -52,9 +52,6 @@ RUN set -eo pipefail && if [[ -v DEBUG ]]; then set -x; fi && \
   echo "IdentityFile /etc/puppetlabs/ssh/id_rsa" >> /etc/ssh/ssh_config && \
   echo "GlobalKnownHostsFile /etc/puppetlabs/ssh/known_hosts" >> /etc/ssh/ssh_config && \
   \
-  # Fix 'puppetserver foreground' command so it can listen for signals from docker and exit gracefully
-  # sed -i "s/runuser \"/exec runuser \"/" /opt/puppetlabs/server/apps/puppetserver/cli/apps/foreground && \
-  \
   # Disable TLSv1 to be more secure
   sed -ri 's/#?(ssl-protocols:.*)TLSv1, (.*)/\1\2/' /etc/puppetlabs/puppetserver/conf.d/puppetserver.conf && \
   \
@@ -63,12 +60,15 @@ RUN set -eo pipefail && if [[ -v DEBUG ]]; then set -x; fi && \
   yum clean all && \
   rm -rf /var/cache/yum
 
-COPY logback.xml /etc/puppetlabs/puppetserver/
-COPY request-logging.xml /etc/puppetlabs/puppetserver/
-COPY docker-entrypoint.sh /docker-entrypoint.sh
-COPY healthcheck.sh /healthcheck.sh
-COPY gen-ssh-keys /usr/local/bin/gen-ssh-keys
-COPY refresh-env-cache /usr/local/bin/refresh-env-cache
+# COPY logback.xml /etc/puppetlabs/puppetserver/
+# COPY request-logging.xml /etc/puppetlabs/puppetserver/
+# COPY docker-entrypoint.sh /docker-entrypoint.sh
+# COPY healthcheck.sh /healthcheck.sh
+# COPY gen-ssh-keys /usr/local/bin/gen-ssh-keys
+# COPY refresh-env-cache /usr/local/bin/refresh-env-cache
+COPY config /etc/puppetlabs/puppetserver/
+COPY docker-helper /
+COPY bin /usr/local/bin/refresh-env-cache
 
 RUN chmod +x \
       /docker-entrypoint.sh \
@@ -82,13 +82,13 @@ VOLUME ["/etc/puppetlabs/code", \
         "/etc/puppetlabs/ssh" ]
 
 # Configuration defaults
-ENV JAVA_ARGS="-Xms2g -Xmx2g -Djruby.logger.class=com.puppetlabs.jruby_utils.jruby.Slf4jLogger"
-ENV DNS_ALT_NAMES="puppet,puppet.localhost"
-ENV AGENT_ENVIRONMENT="production"
-ENV HEALTHCHECK_ENVIRONMENT="production"
-ENV SOFT_WRITE_FAILURE="true"
-ENV ENABLE_DNS_ALT_NAME_SIGNING="true"
-ENV AUTOSIGN=true
+ENV JAVA_ARGS="-Xms2g -Xmx2g -Djruby.logger.class=com.puppetlabs.jruby_utils.jruby.Slf4jLogger" \
+  DNS_ALT_NAMES="puppet,puppet.localhost" \
+  AGENT_ENVIRONMENT="production" \
+  HEALTHCHECK_ENVIRONMENT="production" \
+  SOFT_WRITE_FAILURE="true" \
+  ENABLE_DNS_ALT_NAME_SIGNING="true" \
+  AUTOSIGN=true
 
 EXPOSE 8140
 
