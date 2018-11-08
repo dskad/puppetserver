@@ -60,21 +60,15 @@ RUN set -eo pipefail && if [[ -v DEBUG ]]; then set -x; fi && \
   yum clean all && \
   rm -rf /var/cache/yum
 
-# COPY logback.xml /etc/puppetlabs/puppetserver/
-# COPY request-logging.xml /etc/puppetlabs/puppetserver/
-# COPY docker-entrypoint.sh /docker-entrypoint.sh
-# COPY healthcheck.sh /healthcheck.sh
-# COPY gen-ssh-keys /usr/local/bin/gen-ssh-keys
-# COPY refresh-env-cache /usr/local/bin/refresh-env-cache
 COPY config /etc/puppetlabs/puppetserver/
 COPY docker-helper /
 COPY bin /usr/local/bin/
 
 RUN chmod +x \
-      /docker-entrypoint.sh \
-      /healthcheck.sh \
-      /usr/local/bin/gen-ssh-keys \
-      /usr/local/bin/refresh-env-cache
+  /docker-entrypoint.sh \
+  /healthcheck.sh \
+  /usr/local/bin/gen-ssh-keys \
+  /usr/local/bin/refresh-env-cache
 
 # Save the important stuff!
 VOLUME ["/etc/puppetlabs/code", \
