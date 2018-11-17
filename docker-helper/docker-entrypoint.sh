@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 set -eo pipefail
 if [[ -v DEBUG ]]; then set -x; fi
 
@@ -22,7 +22,7 @@ if [[ "$2" = "foreground" ]]; then
   # environment to configure this container
   puppet config set --section agent environment ${AGENT_ENVIRONMENT}
 
-  # Enable basic autosigning. More advanced auto signing should mount via volume
+  # Enable basic signing. More advanced auto signing should mount via volume
   if [[ -n "${AUTOSIGN}" ]] ; then
     echo "*" > /etc/puppetlabs/puppet/autosign.conf
     chown puppet.puppet /etc/puppetlabs/puppet/autosign.conf
@@ -108,7 +108,7 @@ if [[ "$2" = "foreground" ]]; then
   fi
 
   # If r10k.yaml doesn't exist, and source url(s) are supplied, build the basic r10k config file
-  if [[ ! -f /etc/puppetlabs/r10k/r10k.yaml ]] && (env | grep -q R10K_SOURCE); then
+  if (env | grep -q R10K_SOURCE); then
     echo -e "---\n:cachedir: /opt/puppetlabs/server/data/puppetserver/r10k\n\n:sources:" > /etc/puppetlabs/r10k/r10k.yaml
 
     # If R10k sources are supplied via R10K_SOURCE* environment variables, add them to the r10k config file
