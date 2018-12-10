@@ -31,7 +31,7 @@ if [[ "$2" = "foreground" ]]; then
   puppet config set --section main dns_alt_names $(facter fqdn),$(facter hostname),$DNS_ALT_NAMES
 
   # To allow infrastructure scaling like compile masters and puppetdb clusters
-  # TODO investigate server code to see if this can be done in autosign.config or other code change instead of globally
+  # TODO: investigate server code to see if this can be done in autosign.config or other code change instead of globally
   if [[ -n "${ENABLE_DNS_ALT_NAME_SIGNING}" ]]; then
     sed -i "s/#\?\s\+allow-subject-alt-names.*/allow-subject-alt-names: true/" /etc/puppetlabs/puppetserver/conf.d/ca.conf
   fi
@@ -94,7 +94,7 @@ if [[ "$2" = "foreground" ]]; then
   fi
 
   # Generate SSH key pair for R10k if it doesn't exist
-  if [[ ! -f  /etc/puppetlabs/ssh/id_rsa ]]; then
+  if (env | grep -q R10K_SOURCE) && [[ ! -f  /etc/puppetlabs/ssh/id_rsa ]]; then
     gen-ssh-keys -n -c "$(facter fqdn)"
     if [[ ${SHOW_SSH_KEY} = "true" ]]; then
       echo "SSH public key:"
@@ -111,6 +111,7 @@ if [[ "$2" = "foreground" ]]; then
   if (env | grep -q R10K_SOURCE); then
     echo -e "---\n:cachedir: /opt/puppetlabs/server/data/puppetserver/r10k\n\n:sources:" > /etc/puppetlabs/r10k/r10k.yaml
 
+    # TODO: allow custom basedir
     # If R10k sources are supplied via R10K_SOURCE* environment variables, add them to the r10k config file
     env -0 | while IFS='=' read -r -d '' NAME VALUE; do
       # looping through each R10K_SOURCE variables (R10K_SOURCE1, R10K_SOURCE2, etc)
