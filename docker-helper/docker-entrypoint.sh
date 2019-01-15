@@ -1,8 +1,12 @@
 #!/usr/bin/env bash
 set -eo pipefail
 if [[ -v DEBUG ]]; then set -x; fi
+shopt -s nocasematch
 
 if [[ "$2" = "foreground" ]]; then
+  # *** AGENT CONFIG ***
+  #*********************
+
   # Update puppetserver configs to use JAVA_ARGS variable to configure java runtime
   [[ -n "${JAVA_ARGS}" ]] && sed -i "s/JAVA_ARGS=.*$/JAVA_ARGS=\"\$JAVA_ARGS\"/" /etc/sysconfig/puppetserver
 
@@ -21,14 +25,17 @@ if [[ "$2" = "foreground" ]]; then
 
   # environment to configure this container
   puppet config set --section agent environment ${AGENT_ENVIRONMENT}
+  puppet config set --section main dns_alt_names $(facter fqdn),$(facter hostname),$DNS_ALT_NAMES
+
+
+  # *** CA  Config ***
+  #*******************
 
   # Enable basic signing. More advanced auto signing should mount via volume
   if [[ -n "${AUTOSIGN}" ]] ; then
     echo "*" > /etc/puppetlabs/puppet/autosign.conf
     chown puppet.puppet /etc/puppetlabs/puppet/autosign.conf
   fi
-
-  puppet config set --section main dns_alt_names $(facter fqdn),$(facter hostname),$DNS_ALT_NAMES
 
   # To allow infrastructure scaling like compile masters and puppetdb clusters
   # TODO: investigate server code to see if this can be done in autosign.config or other code change instead of globally
@@ -50,12 +57,14 @@ if [[ "$2" = "foreground" ]]; then
       CA_PORT=$(puppet config print ca_port)
     fi
 
+    # Wait for the CA server to spin up, in case the infra was started all at the same time
     while ! (echo > /dev/tcp/${CA_SERVER}/${CA_PORT}) >/dev/null 2>&1; do
       echo 'Waiting for puppet server to become available...'
       sleep 10
     done
 
-    # get the CA server to sign our cert, force prod environment in case this server is set to use some other env
+    # Get the CA server to sign our cert, force prod environment in case this server is set to use some other
+    #   env that doesn't exist pre R10k run
     puppet agent \
       --verbose \
       --no-daemonize \
@@ -66,8 +75,8 @@ if [[ "$2" = "foreground" ]]; then
       --environment production \
       --waitforcert 30s
 
-    # Update puppetserver webserver.conf to point to certificates from puppet run. This is was not well documented
-    # When no CA is setup, puppetserver won't run without ssl-crl-path set, if that is set, the others have to be set
+    # Update puppetserver webserver.conf to point to new certificates from puppet run.
+    # When CA is disabled, puppetserver won't run without ssl-crl-path set, if that is set, the others have to be set
     sed -i '/}/d' /etc/puppetlabs/puppetserver/conf.d/webserver.conf
     echo "    ssl-cert: $(puppet config print hostcert)" >> /etc/puppetlabs/puppetserver/conf.d/webserver.conf
     echo "    ssl-key: $(puppet config print hostprivkey)" >> /etc/puppetlabs/puppetserver/conf.d/webserver.conf
@@ -75,6 +84,10 @@ if [[ "$2" = "foreground" ]]; then
     echo "    ssl-crl-path: $(puppet config print hostcrl)" >> /etc/puppetlabs/puppetserver/conf.d/webserver.conf
     echo "}" >> /etc/puppetlabs/puppetserver/conf.d/webserver.conf
   fi
+
+
+  # *** Configure PuppetDB connections ***
+  # **************************************
 
   # Configure for puppetdb if PUPPETDB_SERVER_URLS is set
   if [[ -n "${PUPPETDB_SERVER_URLS}" ]]; then
@@ -93,22 +106,12 @@ if [[ "$2" = "foreground" ]]; then
     echo "    cache: yaml" >> /etc/puppetlabs/puppet/routes.yaml
   fi
 
-  # Generate SSH key pair for R10k if it doesn't exist
-  if (env | grep -q R10K_SOURCE) && [[ ! -f  /etc/puppetlabs/ssh/id_rsa ]]; then
-    gen-ssh-keys -n -c "$(facter fqdn)"
-    if [[ ${SHOW_SSH_KEY} = "true" ]]; then
-      echo "SSH public key:"
-      gen-ssh-keys -p
-    fi
-  fi
 
-  # Disable strict host checking in SSH if SSH_HOST_KEY_CHECK is false
-  if [[ "${SSH_HOST_KEY_CHECK}" = "false" ]]; then
-    echo "StrictHostKeyChecking no" >> /etc/ssh/ssh_config
-  fi
+  # *** Configure R10k ***
+  # ******************************
 
   # If r10k.yaml doesn't exist, and source url(s) are supplied, build the basic r10k config file
-  if (env | grep -q R10K_SOURCE); then
+  if (env | grep -q '^R10K_SOURCE\n*'); then
     echo -e "---\n:cachedir: /opt/puppetlabs/server/data/puppetserver/r10k\n\n:sources:" > /etc/puppetlabs/r10k/r10k.yaml
 
     # TODO: allow custom basedir
@@ -118,6 +121,7 @@ if [[ "$2" = "foreground" ]]; then
       if [[ ${NAME} =~ R10K_SOURCE\n* && -n "${VALUE}" ]]; then
         IFS=',' read -ra SOURCE <<< "$VALUE"
 
+        # Add config to r10k.yaml
         echo -e "  ${SOURCE[0]}:\n    remote: ${SOURCE[1]}" >>/etc/puppetlabs/r10k/r10k.yaml
         echo -e "    basedir: /etc/puppetlabs/code/environments" >>/etc/puppetlabs/r10k/r10k.yaml
         if [[ ${#SOURCE[@]} > 2 ]]; then
@@ -126,36 +130,60 @@ if [[ "$2" = "foreground" ]]; then
           echo -e "    prefix: false\n" >>/etc/puppetlabs/r10k/r10k.yaml
         fi
 
-        # If SSH host key checking and auto trust is turned on, connect to source and add host key
-        if [[ ! "${SSH_HOST_KEY_CHECK}" = "false" && "${TRUST_SSH_FIRST_CONNECT}" = "true" ]]; then
-          # Parse the R10K_SOURCE# url for the remote
-          shopt -s nocasematch
-          pattern='^(([[:alnum:]]+)://)?((([[:alnum:]]+)(:?([[:alnum:]]+)?))@)?([^:^@^/]+)(:([[:digit:]]+))?(/.*)'
-          if [[ ${SOURCE[1]} =~ ${pattern} ]]; then
-            protocol=${BASH_REMATCH[2]}
-            user=${BASH_REMATCH[5]}
-            password=${BASH_REMATCH[7]}
-            host=${BASH_REMATCH[8]}
-            port=${BASH_REMATCH[10]}
-            path=${BASH_REMATCH[11]}
+        # Parse the R10K_SOURCE url
+        pattern='^(([[:alnum:]]+)://)?((([[:alnum:]]+)(:?([[:alnum:]]+)?))@)?([^:^@^/]+)(:([[:digit:]]+))?(/.*)'
+        if [[ ${SOURCE[1]} =~ ${pattern} ]]; then
+          protocol=${BASH_REMATCH[2]}
+          user=${BASH_REMATCH[5]}
+          password=${BASH_REMATCH[7]}
+          host=${BASH_REMATCH[8]}
+          port=${BASH_REMATCH[10]}
+          path=${BASH_REMATCH[11]}
+        fi
+
+        # Verify that the source URL is SSH
+        if [[ "${protocol}" = 'ssh' ]]; then
+          # Generate SSH key pair for R10k if it doesn't exist
+          if [[ ! -f  /etc/puppetlabs/ssh/id_rsa ]]; then
+            ssh-keygen -b 4096 -f /etc/puppetlabs/ssh/id_rsa -t rsa -N "" -C "$(facter fqdn)"
+            if [[ ${SHOW_SSH_KEY} = "true" ]]; then
+              echo "SSH public key:"
+              cat /etc/puppetlabs/ssh/id_rsa.pub
+            fi
           fi
 
-          # Verify that the source URL is SSH
-          if [[ "${protocol}" = 'ssh' ]]; then
+          # Disable strict host checking in SSH if SSH_HOST_KEY_CHECK is false
+          if [[ "${SSH_HOST_KEY_CHECK}" = "false" ]]; then
+            echo "StrictHostKeyChecking no" >> /etc/ssh/ssh_config
+          fi
+
+          # TODO: add ability to specify host key and add to known_hosts
+
+          # If SSH host key checking and auto trust is turned on, connect to source and add host key
+          if [[ ! "${SSH_HOST_KEY_CHECK}" = "false" && "${TRUST_SSH_FIRST_CONNECT}" = "true" ]]; then
+
             # set default ssh port of 22 if not indicated in the url
             port=${port:-22}
 
-            # Check to see if the host already exists in known_hosts
-            #   * known_hosts formats differently if alternate port specified
+            # Check to see if the host already exists in known_hosts, if not, scan the host and add it
+            # * Caution, known_hosts formats differently if alternate port specified
             if [[ "${port}" = "22" && ! "$(ssh-keygen -F ${host} -f /etc/puppetlabs/ssh/known_hosts -t rsa > /dev/null 2>&1)" ]]; then
               ssh-keyscan -p ${port} ${host} >> /etc/puppetlabs/ssh/known_hosts
             elif [[ ! "$(ssh-keygen -F [$host]:${port} -f /etc/puppetlabs/ssh/known_hosts -t rsa > /dev/null 2>&1)" ]]; then
               ssh-keyscan -p ${port} $host >> /etc/puppetlabs/ssh/known_hosts
             fi
           fi
-
-          shopt -u nocasematch
         fi
+      fi
+    done
+  fi
+
+  # *** Add custom CA certs from environment variables CA1, CA2, etc
+  # ***********************
+  if (env | grep -q '^CA\n*'); then
+    env -0 | while IFS='=' read -r -d '' NAME VALUE; do
+      if [[ ${NAME} =~ ^CA\n* && -n "${VALUE}" ]] ; then
+        echo "${VALUE}" > /etc/puppetlabs/git/ca/${NAME}.pem
       fi
     done
   fi

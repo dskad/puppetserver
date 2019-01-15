@@ -3,7 +3,7 @@ FROM centos:7
 LABEL maintainer="dskadra@gmail.com"
 
 ENV PATH="$PATH:/opt/puppetlabs/bin:/opt/puppetlabs/puppet/bin:/opt/puppetlabs/server/bin" \
-    FACTER_CONTAINER_ROLE="puppetserver"
+  FACTER_CONTAINER_ROLE="puppetserver"
 
 # Current available releases: puppet5, puppet5-nightly, puppet6, puppet6-nightly
 ARG PUPPET_RELEASE="puppet6"
@@ -26,9 +26,9 @@ RUN set -eo pipefail && if [[ -v DEBUG ]]; then set -x; fi && \
   # Update and install stuff
   yum -y update && \
   yum -y install \
-    git \
-    puppetserver${PUPPETSERVER_VERSION:+-}${PUPPETSERVER_VERSION} \
-    puppetdb-termini && \
+  git \
+  puppetserver${PUPPETSERVER_VERSION:+-}${PUPPETSERVER_VERSION} \
+  puppetdb-termini && \
   \
   # Install dumb-init
   curl -Lo /usr/local/bin/dumb-init https://github.com/Yelp/dumb-init/releases/download/v${DUMB_INIT_VERSION}/dumb-init_${DUMB_INIT_VERSION}_amd64 && \
@@ -50,7 +50,8 @@ RUN set -eo pipefail && if [[ -v DEBUG ]]; then set -x; fi && \
   mkdir -p /etc/puppetlabs/ssh && \
   chmod 700 /etc/puppetlabs/ssh && \
   echo "IdentityFile /etc/puppetlabs/ssh/id_rsa" >> /etc/ssh/ssh_config && \
-  echo "GlobalKnownHostsFile /etc/puppetlabs/ssh/known_hosts" >> /etc/ssh/ssh_config && \
+  echo "GlobalKnownHostsFile /etc/puppetlabs/ssh_known_hosts" >> /etc/ssh/ssh_config && \
+  echo "UserKnownHostsFile /etc/puppetlabs/ssh_known_hosts" >> /etc/ssh/ssh_config && \
   \
   # Disable TLSv1 to be more secure
   sed -ri 's/#?(ssl-protocols:.*)TLSv1, (.*)/\1\2/' /etc/puppetlabs/puppetserver/conf.d/puppetserver.conf && \
@@ -72,8 +73,8 @@ RUN chmod +x \
 
 # Save the important stuff!
 VOLUME ["/etc/puppetlabs/code", \
-        "/etc/puppetlabs/puppet/ssl", \
-        "/etc/puppetlabs/ssh" ]
+  "/etc/puppetlabs/puppet/ssl", \
+  "/etc/puppetlabs/ssh" ]
 
 # Configuration defaults
 ENV JAVA_ARGS="-Xms2g -Xmx2g -Djruby.logger.class=com.puppetlabs.jruby_utils.jruby.Slf4jLogger" \
@@ -82,7 +83,7 @@ ENV JAVA_ARGS="-Xms2g -Xmx2g -Djruby.logger.class=com.puppetlabs.jruby_utils.jru
   HEALTHCHECK_ENVIRONMENT="production" \
   SOFT_WRITE_FAILURE="true" \
   ENABLE_DNS_ALT_NAME_SIGNING="true" \
-  AUTOSIGN=true
+  AUTOSIGN="true"
 
 EXPOSE 8140
 
