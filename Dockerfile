@@ -68,7 +68,6 @@ COPY bin /usr/local/bin/
 RUN chmod +x \
   /docker-entrypoint.sh \
   /healthcheck.sh \
-  /usr/local/bin/gen-ssh-keys \
   /usr/local/bin/refresh-env-cache
 
 # Save the important stuff!
