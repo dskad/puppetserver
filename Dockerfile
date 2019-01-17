@@ -13,7 +13,7 @@ ARG PUPPET_RELEASE="puppet6"
 # ENV PUPPETSERVER_VERSION="5.3.*"
 # ENV PUPPETSERVER_VERSION="5.3.4"
 ARG PUPPETSERVER_VERSION
-ARG R10k_VERSION
+ARG R10K_VERSION
 ARG HIERA_EYAML_VERSION
 ARG DUMB_INIT_VERSION="1.2.2"
 
@@ -35,7 +35,7 @@ RUN set -eo pipefail && if [[ -v DEBUG ]]; then set -x; fi && \
   chmod +x /usr/local/bin/dumb-init && \
   \
   # Install Ruby gems for R10k and hiera-eyaml
-  /opt/puppetlabs/puppet/bin/gem install r10k -N ${R10k_VERSION:+--version }${R10k_VERSION} && \
+  /opt/puppetlabs/puppet/bin/gem install r10k -N ${R10K_VERSION:+--version }${R10K_VERSION} && \
   /opt/puppetlabs/puppet/bin/gem install hiera-eyaml -N ${HIERA_EYAML_VERSION:+--version }${HIERA_EYAML_VERSION} && \
   mkdir /etc/puppetlabs/r10k && \
   \
@@ -81,7 +81,7 @@ ENV JAVA_ARGS="-Xms2g -Xmx2g -Djruby.logger.class=com.puppetlabs.jruby_utils.jru
   AGENT_ENVIRONMENT="production" \
   HEALTHCHECK_ENVIRONMENT="production" \
   SOFT_WRITE_FAILURE="true" \
-  ENABLE_DNS_ALT_NAME_SIGNING="true" \
+  ALLOW_SUBJECT_ALT_NAMES="true" \
   AUTOSIGN="true"
 
 EXPOSE 8140

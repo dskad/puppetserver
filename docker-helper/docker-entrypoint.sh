@@ -1,15 +1,12 @@
 #!/usr/bin/env bash
+
+shopt -s nocasematch
 set -eo pipefail
 if [[ -v DEBUG ]]; then set -x; fi
-shopt -s nocasematch
 
 if [[ "$2" = "foreground" ]]; then
-  # *** AGENT CONFIG ***
+  # *** Puppet Agent Config ***
   #*********************
-
-  # Update puppetserver configs to use JAVA_ARGS variable to configure java runtime
-  [[ -n "${JAVA_ARGS}" ]] && sed -i "s/JAVA_ARGS=.*$/JAVA_ARGS=\"\$JAVA_ARGS\"/" /etc/sysconfig/puppetserver
-
   # Point the server's puppet agent to SERVER or this host's hostname
   if [[ -n "${SERVER}" ]]; then
     puppet config set --section agent server ${SERVER}
@@ -28,9 +25,19 @@ if [[ "$2" = "foreground" ]]; then
   puppet config set --section main dns_alt_names $(facter fqdn),$(facter hostname),$DNS_ALT_NAMES
 
 
+  # *** Puppet Server Config ***
+  #*******************
+  # Update puppetserver configs to use JAVA_ARGS variable to configure java runtime
+  [[ -n "${JAVA_ARGS}" ]] && sed -i "s/JAVA_ARGS=.*$/JAVA_ARGS=\"\$JAVA_ARGS\"/" /etc/sysconfig/puppetserver
+
+  # Should  be either 0 or unlimited. 0 is default, unlimited requires calling environment refresh API
+  if [[ -n "${ENVIRONMENT_TIMEOUT}" ]]; then
+    puppet config set environment_timeout ${ENVIRONMENT_TIMEOUT}
+  fi
+
+
   # *** CA  Config ***
   #*******************
-
   # Enable basic signing. More advanced auto signing should mount via volume
   if [[ -n "${AUTOSIGN}" ]] ; then
     echo "*" > /etc/puppetlabs/puppet/autosign.conf
@@ -39,7 +46,7 @@ if [[ "$2" = "foreground" ]]; then
 
   # To allow infrastructure scaling like compile masters and puppetdb clusters
   # TODO: investigate server code to see if this can be done in autosign.config or other code change instead of globally
-  if [[ -n "${ENABLE_DNS_ALT_NAME_SIGNING}" ]]; then
+  if [[ -n "${ALLOW_SUBJECT_ALT_NAMES}" ]]; then
     sed -i "s/#\?\s\+allow-subject-alt-names.*/allow-subject-alt-names: true/" /etc/puppetlabs/puppetserver/conf.d/ca.conf
   fi
 
@@ -109,7 +116,6 @@ if [[ "$2" = "foreground" ]]; then
 
   # *** Configure R10k ***
   # ******************************
-
   # If r10k.yaml doesn't exist, and source url(s) are supplied, build the basic r10k config file
   if (env | grep -q '^R10K_SOURCE\n*'); then
     echo -e "---\n:cachedir: /opt/puppetlabs/server/data/puppetserver/r10k\n\n:sources:" > /etc/puppetlabs/r10k/r10k.yaml
@@ -152,15 +158,15 @@ if [[ "$2" = "foreground" ]]; then
             fi
           fi
 
-          # Disable strict host checking in SSH if SSH_HOST_KEY_CHECK is false
-          if [[ "${SSH_HOST_KEY_CHECK}" = "false" ]]; then
+          # Disable strict host checking in SSH if STRICT_HOST_KEY_CHECKING is false
+          if [[ "${STRICT_HOST_KEY_CHECKING}" = "false" ]]; then
             echo "StrictHostKeyChecking no" >> /etc/ssh/ssh_config
           fi
 
           # TODO: add ability to specify host key and add to known_hosts
 
           # If SSH host key checking and auto trust is turned on, connect to source and add host key
-          if [[ ! "${SSH_HOST_KEY_CHECK}" = "false" && "${TRUST_SSH_FIRST_CONNECT}" = "true" ]]; then
+          if [[ ! "${STRICT_HOST_KEY_CHECKING}" = "false" && "${TRUST_SSH_FIRST_CONNECT}" = "true" ]]; then
 
             # set default ssh port of 22 if not indicated in the url
             port=${port:-22}
@@ -178,19 +184,14 @@ if [[ "$2" = "foreground" ]]; then
     done
   fi
 
-  # *** Add custom CA certs from environment variables CA1, CA2, etc
-  # ***********************
-  if (env | grep -q '^CA\n*'); then
+  # *** Add custom CA certs from environment variables HOST_CA1, HOST_CA2, etc
+  # ***************************************************************************
+  if (env | grep -q '^HOST_CA\n*'); then
     env -0 | while IFS='=' read -r -d '' NAME VALUE; do
-      if [[ ${NAME} =~ ^CA\n* && -n "${VALUE}" ]] ; then
+      if [[ ${NAME} =~ ^HOST_CA\n* && -n "${VALUE}" ]] ; then
         echo "${VALUE}" > /etc/puppetlabs/git/ca/${NAME}.pem
       fi
     done
-  fi
-
-  # Should  be either 0 or unlimited. 0 is default, unlimited requires calling environment refresh API
-  if [[ -n "${ENVIRONMENT_TIMEOUT}" ]]; then
-    puppet config set environment_timeout ${ENVIRONMENT_TIMEOUT}
   fi
 
   # Run R10k to update local environments if environment var set
@@ -199,7 +200,7 @@ if [[ "$2" = "foreground" ]]; then
     r10k deploy environment -p -v
   fi
 
-  # Apply current config for this instance. Volumes retain config across container restarts
+  # Apply current config for this instance. Use volumes retain config across container restarts
   if [[ "${RUN_PUPPET_AGENT_ON_START}" = "true" ]]; then
     puppet apply /etc/puppetlabs/code/environments/${AGENT_ENVIRONMENT}/manifests/site.pp -v
   fi
