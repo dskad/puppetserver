@@ -149,6 +149,21 @@ if [[ "$2" = "foreground" ]]; then
 
         # Verify that the source URL is SSH
         if [[ "${protocol}" = 'ssh' ]]; then
+          # Add SSH keypair if supplied
+          if [[ -n "${SSH_PRIV_KEY}" && -n "${SSH_PUB_KEY}" ]]; then
+            echo "${SSH_PUB_KEY}" > /etc/puppetlabs/ssh/id_rsa.pub
+            echo "${SSH_PRIV_KEY}" > /etc/puppetlabs/ssh/id_rsa
+          fi
+
+          # Add custom CA certs
+          if (env | grep -q '^HOST_CA\n*'); then
+            env -0 | while IFS='=' read -r -d '' NAME VALUE; do
+              if [[ ${NAME} =~ ^HOST_CA\n* && -n "${VALUE}" ]] ; then
+                echo "${VALUE}" > /etc/puppetlabs/git/ca/${NAME}.pem
+              fi
+            done
+          fi
+
           # Generate SSH key pair for R10k if it doesn't exist
           if [[ ! -f  /etc/puppetlabs/ssh/id_rsa ]]; then
             ssh-keygen -b 4096 -f /etc/puppetlabs/ssh/id_rsa -t rsa -N "" -C "$(facter fqdn)"
