@@ -153,6 +153,8 @@ if [[ "$2" = "foreground" ]]; then
           if [[ -n "${SSH_PRIV_KEY}" && -n "${SSH_PUB_KEY}" ]]; then
             echo "${SSH_PUB_KEY}" > /etc/puppetlabs/ssh/id_rsa.pub
             echo "${SSH_PRIV_KEY}" > /etc/puppetlabs/ssh/id_rsa
+            chmod 644 /etc/puppetlabs/ssh/id_rsa.pub
+            chmod 600 /etc/puppetlabs/ssh/id_rsa
           fi
 
           # Add custom CA certs

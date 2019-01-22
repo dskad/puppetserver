@@ -50,8 +50,7 @@ RUN set -eo pipefail && if [[ -v DEBUG ]]; then set -x; fi && \
   mkdir -p /etc/puppetlabs/ssh && \
   chmod 700 /etc/puppetlabs/ssh && \
   echo "IdentityFile /etc/puppetlabs/ssh/id_rsa" >> /etc/ssh/ssh_config && \
-  echo "GlobalKnownHostsFile /etc/puppetlabs/ssh_known_hosts" >> /etc/ssh/ssh_config && \
-  echo "UserKnownHostsFile /etc/puppetlabs/ssh_known_hosts" >> /etc/ssh/ssh_config && \
+  echo "GlobalKnownHostsFile /etc/puppetlabs/ssh/known_hosts" >> /etc/ssh/ssh_config && \
   \
   # Disable TLSv1 to be more secure
   sed -ri 's/#?(ssl-protocols:.*)TLSv1, (.*)/\1\2/' /etc/puppetlabs/puppetserver/conf.d/puppetserver.conf && \
