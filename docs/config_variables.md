@@ -21,7 +21,7 @@ Use these variables when building or running a Puppet Server container
 
 | Variable                | Default Values | Description                                            |
 | ----------------------- | -------------- | ------------------------------------------------------ |
-| DEBUG                   | False          | Show debut messages when running entrypoint.sh         |
+| DEBUG                   | False          | Show commands and arguments when running entrypoint.sh |
 | HEALTHCHECK_ENVIRONMENT | production     | Puppet environment to use when checking server health. |
 
 ### Puppet Agent
@@ -52,7 +52,8 @@ Use these variables when building or running a Puppet Server container
 | Variable                 | Default Values | Description                                                                                              |
 | ------------------------ | -------------- | -------------------------------------------------------------------------------------------------------- |
 | R10K_SOURCE\<n>          | < none >       | Source URL for R10k and optional prefix (see documentation for examples and format)                      |
-| HOST_CA\<n>              | < none >       | Custom root/intermediate CA certificates in PEM format to allow internally/self signed host certificates |
+| CA_CERT\<n>              | < none >       | Custom root/intermediate CA certificates in PEM format to allow internally/self signed host certificates |
+| SSH_PRIV_KEY             | < none >       | Use supplied SSH private key when connecting to git repositories via SSH urls                            |
 | SHOW_SSH_KEY             | False          | Print the public SSH key from the automatically generated key pair                                       |
 | STRICT_HOST_KEY_CHECKING | True           | Only connect to SSH servers identified in /etc/puppetlabs/ssh/known_hosts                                |
 | TRUST_SSH_FIRST_CONNECT  | False          | Trust remote SSH server and add signature to /etc/puppetlabs/ssh/known_hosts                             |

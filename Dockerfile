@@ -49,11 +49,16 @@ RUN set -eo pipefail && if [[ -v DEBUG ]]; then set -x; fi && \
   # Configure SSH to store keys in a location saved by volumes for R10k
   mkdir -p /etc/puppetlabs/ssh && \
   chmod 700 /etc/puppetlabs/ssh && \
+  echo "IdentityFile /etc/puppetlabs/ssh/id_key" >> /etc/ssh/ssh_config && \
+  echo "IdentityFile /etc/puppetlabs/ssh/identity" >> /etc/ssh/ssh_config && \
   echo "IdentityFile /etc/puppetlabs/ssh/id_rsa" >> /etc/ssh/ssh_config && \
+  echo "IdentityFile /etc/puppetlabs/ssh/id_dsa" >> /etc/ssh/ssh_config && \
+  echo "IdentityFile /etc/puppetlabs/ssh/id_ecdsa" >> /etc/ssh/ssh_config && \
+  echo "IdentityFile /etc/puppetlabs/ssh/id_ed25519" >> /etc/ssh/ssh_config && \
   echo "GlobalKnownHostsFile /etc/puppetlabs/ssh/known_hosts" >> /etc/ssh/ssh_config && \
   \
-  # Disable TLSv1 to be more secure
-  sed -ri 's/#?(ssl-protocols:.*)TLSv1, (.*)/\1\2/' /etc/puppetlabs/puppetserver/conf.d/puppetserver.conf && \
+  # Disable TLSv1 and TLSv1.1 to be more secure
+  sed -ri 's/#?(ssl-protocols:.*)TLSv1, TLSv1.1, (.*)/\1\2/' /etc/puppetlabs/puppetserver/conf.d/puppetserver.conf && \
   \
   # Cleanup
   chown -R puppet:puppet $(puppet config print confdir) && \

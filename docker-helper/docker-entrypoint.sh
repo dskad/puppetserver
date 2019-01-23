@@ -36,7 +36,7 @@ if [[ "$2" = "foreground" ]]; then
   fi
 
 
-  # *** CA  Config ***
+  # *** Puppet CA Config ***
   #*******************
   # Enable basic signing. More advanced auto signing should mount via volume
   if [[ -n "${AUTOSIGN}" ]] ; then
@@ -114,6 +114,40 @@ if [[ "$2" = "foreground" ]]; then
   fi
 
 
+  # *** Configure SSH ***
+  # ******************************
+  # Add SSH private key if supplied
+  if [[ -n "${SSH_PRIV_KEY}" ]]; then
+    echo "${SSH_PRIV_KEY}" > /etc/puppetlabs/ssh/id_key
+    chmod 600 /etc/puppetlabs/ssh/id_key
+  fi
+
+  # Generate SSH key pair for R10k if it doesn't exist
+  if [[ ! -f  /etc/puppetlabs/ssh/id_key ]]; then
+    ssh-keygen  -f /etc/puppetlabs/ssh/id_key -t ed25519 -N "" -C "$(facter fqdn)"
+    if [[ ${SHOW_SSH_KEY} = "true" ]]; then
+      echo "SSH public key:"
+      cat /etc/puppetlabs/ssh/id_key.pub
+    fi
+  fi
+
+  # Disable strict host checking in SSH if STRICT_HOST_KEY_CHECKING is false
+  if [[ "${STRICT_HOST_KEY_CHECKING}" = "false" ]]; then
+    echo "StrictHostKeyChecking no" >> /etc/ssh/ssh_config
+  fi
+
+
+  # *** Add custom CA certs from environment variables CA_CERT1, CA_CERT2, etc
+  # ***************************************************************************
+  if (env | grep -q '^CA_CERT\n*'); then
+    env -0 | while IFS='=' read -r -d '' NAME VALUE; do
+      if [[ ${NAME} =~ ^CA_CERT\n* && -n "${VALUE}" ]] ; then
+        echo "${VALUE}" > /etc/puppetlabs/git/ca/${NAME}.pem
+      fi
+    done
+  fi
+
+
   # *** Configure R10k ***
   # ******************************
   # If r10k.yaml doesn't exist, and source url(s) are supplied, build the basic r10k config file
@@ -127,7 +161,7 @@ if [[ "$2" = "foreground" ]]; then
       if [[ ${NAME} =~ R10K_SOURCE\n* && -n "${VALUE}" ]]; then
         IFS=',' read -ra SOURCE <<< "$VALUE"
 
-        # Add config to r10k.yaml
+        # Add source config to r10k.yaml
         echo -e "  ${SOURCE[0]}:\n    remote: ${SOURCE[1]}" >>/etc/puppetlabs/r10k/r10k.yaml
         echo -e "    basedir: /etc/puppetlabs/code/environments" >>/etc/puppetlabs/r10k/r10k.yaml
         if [[ ${#SOURCE[@]} > 2 ]]; then
@@ -140,48 +174,15 @@ if [[ "$2" = "foreground" ]]; then
         pattern='^(([[:alnum:]]+)://)?((([[:alnum:]]+)(:?([[:alnum:]]+)?))@)?([^:^@^/]+)(:([[:digit:]]+))?(/.*)'
         if [[ ${SOURCE[1]} =~ ${pattern} ]]; then
           protocol=${BASH_REMATCH[2]}
-          user=${BASH_REMATCH[5]}
-          password=${BASH_REMATCH[7]}
+          #user=${BASH_REMATCH[5]}
+          #password=${BASH_REMATCH[7]}
           host=${BASH_REMATCH[8]}
           port=${BASH_REMATCH[10]}
-          path=${BASH_REMATCH[11]}
+          #path=${BASH_REMATCH[11]}
         fi
 
         # Verify that the source URL is SSH
         if [[ "${protocol}" = 'ssh' ]]; then
-          # Add SSH keypair if supplied
-          if [[ -n "${SSH_PRIV_KEY}" && -n "${SSH_PUB_KEY}" ]]; then
-            echo "${SSH_PUB_KEY}" > /etc/puppetlabs/ssh/id_rsa.pub
-            echo "${SSH_PRIV_KEY}" > /etc/puppetlabs/ssh/id_rsa
-            chmod 644 /etc/puppetlabs/ssh/id_rsa.pub
-            chmod 600 /etc/puppetlabs/ssh/id_rsa
-          fi
-
-          # Add custom CA certs
-          if (env | grep -q '^HOST_CA\n*'); then
-            env -0 | while IFS='=' read -r -d '' NAME VALUE; do
-              if [[ ${NAME} =~ ^HOST_CA\n* && -n "${VALUE}" ]] ; then
-                echo "${VALUE}" > /etc/puppetlabs/git/ca/${NAME}.pem
-              fi
-            done
-          fi
-
-          # Generate SSH key pair for R10k if it doesn't exist
-          if [[ ! -f  /etc/puppetlabs/ssh/id_rsa ]]; then
-            ssh-keygen -b 4096 -f /etc/puppetlabs/ssh/id_rsa -t rsa -N "" -C "$(facter fqdn)"
-            if [[ ${SHOW_SSH_KEY} = "true" ]]; then
-              echo "SSH public key:"
-              cat /etc/puppetlabs/ssh/id_rsa.pub
-            fi
-          fi
-
-          # Disable strict host checking in SSH if STRICT_HOST_KEY_CHECKING is false
-          if [[ "${STRICT_HOST_KEY_CHECKING}" = "false" ]]; then
-            echo "StrictHostKeyChecking no" >> /etc/ssh/ssh_config
-          fi
-
-          # TODO: add ability to specify host key and add to known_hosts
-
           # If SSH host key checking and auto trust is turned on, connect to source and add host key
           if [[ ! "${STRICT_HOST_KEY_CHECKING}" = "false" && "${TRUST_SSH_FIRST_CONNECT}" = "true" ]]; then
 
@@ -201,18 +202,8 @@ if [[ "$2" = "foreground" ]]; then
     done
   fi
 
-  # *** Add custom CA certs from environment variables HOST_CA1, HOST_CA2, etc
-  # ***************************************************************************
-  if (env | grep -q '^HOST_CA\n*'); then
-    env -0 | while IFS='=' read -r -d '' NAME VALUE; do
-      if [[ ${NAME} =~ ^HOST_CA\n* && -n "${VALUE}" ]] ; then
-        echo "${VALUE}" > /etc/puppetlabs/git/ca/${NAME}.pem
-      fi
-    done
-  fi
 
-  # Run R10k to update local environments if environment var set
-  # r10k deploy environment -p -v
+  # Run R10k to update local environments
   if [[ "${R10K_ON_STARTUP}" = "true" ]]; then
     r10k deploy environment -p -v
   fi
