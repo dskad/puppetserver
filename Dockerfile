@@ -75,9 +75,10 @@ RUN chmod +x \
   /usr/local/bin/refresh-env-cache
 
 # Save the important stuff!
-VOLUME ["/etc/puppetlabs/code", \
-  "/etc/puppetlabs/puppet/ssl", \
-  "/etc/puppetlabs/ssh" ]
+# VOLUME ["/etc/puppetlabs/code", \
+#   "/etc/puppetlabs/puppet/ssl", \
+#   "/etc/puppetlabs/ssh", \
+#   "/opt/puppetlabs/server/data/puppetserver" ]
 
 # Configuration defaults
 ENV JAVA_ARGS="-Xms2g -Xmx2g -Djruby.logger.class=com.puppetlabs.jruby_utils.jruby.Slf4jLogger" \

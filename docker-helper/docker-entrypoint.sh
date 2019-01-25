@@ -102,9 +102,9 @@ if [[ "$2" = "foreground" ]]; then
     echo "server_urls = ${PUPPETDB_SERVER_URLS}" >> /etc/puppetlabs/puppet/puppetdb.conf
     echo "soft_write_failure = ${SOFT_WRITE_FAILURE}" >> /etc/puppetlabs/puppet/puppetdb.conf
 
-    puppet config set --section master storeconfigs true
-    puppet config set --section master storeconfigs_backend puppetdb
-    puppet config set --section master reports logs,puppetdb
+    puppet config set --section main storeconfigs true
+    puppet config set --section main storeconfigs_backend puppetdb
+    puppet config set --section main reports logs,puppetdb
 
     echo "---" > /etc/puppetlabs/puppet/routes.yaml
     echo "master:" >> /etc/puppetlabs/puppet/routes.yaml
