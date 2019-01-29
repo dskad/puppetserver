@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/usr/bin/bash
 set -e
 
 certname=$(puppet config print certname) && \

@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/bash
 
 # Note: This server must be on the puppetserver.conf whitelist to be able to call this command
 #       This is to be used when setting environment_timeout to unlimited

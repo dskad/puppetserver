@@ -39,13 +39,14 @@ Use these variables when building or running a Puppet Server container to config
 
 ### Puppet Server
 
-| Variable                | Default Values | Description                                                         |
-| ----------------------- | -------------- | ------------------------------------------------------------------- |
-| JAVA_ARGS               | -Xms2g -Xmx2g  | Set Puppet Server's java options                                    |
-| AUTOSIGN                | True           | Turn on basic auto signing of certificate requests                  |
-| ALLOW_SUBJECT_ALT_NAMES | True           | Allow puppet CA to sign certificates with subject alternative names |
-| PUPPETDB_SERVER_URLS    | < none >       | Comma separated list of PuppetDB server URLs                        |
-| SOFT_WRITE_FAILURE      | True           | Gracefully fail puppet runs when PuppetDB servers aren't available  |
+| Variable                | Default Values | Description                                                                                          |
+| ----------------------- | -------------- | ---------------------------------------------------------------------------------------------------- |
+| JAVA_ARGS               | -Xms2g -Xmx2g  | Set Puppet Server's java options                                                                     |
+| AUTOSIGN                | True           | Turn on basic auto signing of certificate requests                                                   |
+| ALLOW_SUBJECT_ALT_NAMES | True           | Allow puppet CA to sign certificates with subject alternative names                                  |
+| ENVIRONMENT_TIMEOUT     | 0              | Set to `0` or `unlimited`. How long the Puppet master should cache data it loads from an environment |
+| PUPPETDB_SERVER_URLS    | < none >       | Comma separated list of PuppetDB server URLs                                                         |
+| SOFT_WRITE_FAILURE      | True           | Gracefully fail puppet runs when PuppetDB servers aren't available                                   |
 
 ### R10k
 
@@ -55,7 +56,7 @@ Use these variables when building or running a Puppet Server container to config
 | CA_CERT\<n>              | < none >       | Custom root/intermediate CA certificates in PEM format to allow internally/self signed host certificates |
 | SSH_PRIV_KEY             | < none >       | Use supplied SSH private key when connecting to git repositories via SSH urls                            |
 | SHOW_SSH_KEY             | False          | Print the public SSH key from the automatically generated key pair                                       |
+| GENERATED_SSH_KEY_TYPE   | ed25519        | Set the type of SSH keypair that is generated. One of ed25519, ecdsa, rsa, dsa                           |  |
 | STRICT_HOST_KEY_CHECKING | True           | Only connect to SSH servers identified in /etc/puppetlabs/ssh/known_hosts                                |
 | TRUST_SSH_FIRST_CONNECT  | False          | Trust remote SSH server and add signature to /etc/puppetlabs/ssh/known_hosts                             |
-| ENVIRONMENT_TIMEOUT      | 0              | Set to `0` or `unlimited`. How long the Puppet master should cache data it loads from an environment     |
 | R10K_ON_STARTUP          | False          | Perform a R10k run before starting puppet server                                                         |

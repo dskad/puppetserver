@@ -87,7 +87,8 @@ ENV JAVA_ARGS="-Xms2g -Xmx2g -Djruby.logger.class=com.puppetlabs.jruby_utils.jru
   HEALTHCHECK_ENVIRONMENT="production" \
   SOFT_WRITE_FAILURE="true" \
   ALLOW_SUBJECT_ALT_NAMES="true" \
-  AUTOSIGN="true"
+  AUTOSIGN="true" \
+  GENERATED_SSH_KEY_TYPE="ed25519"
 
 EXPOSE 8140
 
