@@ -70,9 +70,10 @@ COPY docker-helper /
 COPY bin /usr/local/bin/
 
 RUN chmod +x \
-  /docker-entrypoint.sh \
+  /entrypoint.sh \
   /healthcheck.sh \
-  /usr/local/bin/refresh-env-cache
+  /usr/local/bin/refresh-env-cache \
+  /usr/local/bin/get-ssh-key
 
 # Save the important stuff!
 # VOLUME ["/etc/puppetlabs/code", \
