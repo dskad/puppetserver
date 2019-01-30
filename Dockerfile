@@ -93,5 +93,5 @@ ENV JAVA_ARGS="-Xms2g -Xmx2g -Djruby.logger.class=com.puppetlabs.jruby_utils.jru
 
 EXPOSE 8140
 
-ENTRYPOINT ["dumb-init", "/docker-entrypoint.sh"]
+ENTRYPOINT ["dumb-init", "/entrypoint.sh"]
 CMD ["puppetserver", "foreground"]
