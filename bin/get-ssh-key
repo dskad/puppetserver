@@ -1,3 +1,10 @@
 #!/usr/bin/bash
-
-cat /etc/puppetlabs/ssh/id_key.pub
+if [[ -f "/etc/puppetlabs/ssh/id_key" ]]; then
+  if [[ -f "/etc/puppetlabs/ssh/id_key.pub" ]]; then
+    cat /etc/puppetlabs/ssh/id_key.pub
+  else
+    ssh-keygen -y -f "/etc/puppetlabs/ssh/id_key"
+  fi
+else
+  echo "No SSH keys found"
+fi
