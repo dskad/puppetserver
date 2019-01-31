@@ -43,9 +43,9 @@ if (compgen -A variable | grep -q '^R10K_SOURCE\n*'); then
 
         # Check to see if the host already exists in known_hosts, if not, scan the host and add it
         # * Caution, known_hosts formats differently if alternate port specified
-        if [[ "${port}" = "22" && ! "$(ssh-keygen -F ${host} -f /etc/puppetlabs/ssh/known_hosts -t rsa > /dev/null 2>&1)" ]]; then
+        if [[ "${port}" = "22" ]] && ! ssh-keygen -F ${host} -f /etc/puppetlabs/ssh/known_hosts > /dev/null 2>&1; then
           ssh-keyscan -p ${port} ${host} >> /etc/puppetlabs/ssh/known_hosts
-        elif [[ ! "$(ssh-keygen -F [$host]:${port} -f /etc/puppetlabs/ssh/known_hosts -t rsa > /dev/null 2>&1)" ]]; then
+        elif ! ssh-keygen -F [$host]:${port} -f /etc/puppetlabs/ssh/known_hosts > /dev/null 2>&1; then
           ssh-keyscan -p ${port} $host >> /etc/puppetlabs/ssh/known_hosts
         fi
       fi
