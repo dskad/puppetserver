@@ -3,7 +3,7 @@
 # *** Configure R10k ***
 # ******************************
 # If r10k.yaml doesn't exist, and source url(s) are supplied, build the basic r10k config file
-if (compgen -A variable | grep -q '^R10K_SOURCE\n*'); then
+if [[ ! -f /etc/puppetlabs/r10k/r10k.yaml ]] && compgen -A variable | grep -q '^R10K_SOURCE\n*'; then
   echo -e "---\n:cachedir: /opt/puppetlabs/server/data/puppetserver/r10k\n\n:sources:" > /etc/puppetlabs/r10k/r10k.yaml
 
   # TODO: allow custom basedir
