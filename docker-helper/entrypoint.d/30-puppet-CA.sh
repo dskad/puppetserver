@@ -2,10 +2,9 @@
 
 # *** Puppet CA Config ***
 #*******************
-# Enable basic signing. More advanced auto signing should mount via volume
+# Enable autosigning. true, false or path to executable addeded via volume or build
 if [[ -n "${AUTOSIGN}" ]] ; then
-  echo "*" > /etc/puppetlabs/puppet/autosign.conf
-  chown puppet.puppet /etc/puppetlabs/puppet/autosign.conf
+  puppet config set autosign "$AUTOSIGN" --section master
 fi
 
 # To allow infrastructure scaling like compile masters and puppetdb clusters
