@@ -18,7 +18,7 @@ if [[ ! -f  /etc/puppetlabs/ssh/id_key ]]; then
 fi
 
 # Disable strict host checking in SSH if STRICT_HOST_KEY_CHECKING is false
-if [[ "${STRICT_HOST_KEY_CHECKING}" = "false" && ! grep -q "StrictHostKeyChecking no" ssh_config ]] && ; then
+if [[ "${STRICT_HOST_KEY_CHECKING}" = "false" ]] && ! grep -q "StrictHostKeyChecking no" /etc/ssh/ssh_config; then
   echo "StrictHostKeyChecking no" >> /etc/ssh/ssh_config
 fi
 

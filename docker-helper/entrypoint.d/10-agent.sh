@@ -19,7 +19,7 @@ fi
 puppet config set --section agent environment ${AGENT_ENVIRONMENT}
 
 # Have to be careful not to change the server's cert when acting as a CA server
-if [[ ! -n "${CA_SERVER}"]]; then
+if [[ ! -n "${CA_SERVER}" ]]; then
   currentCertName=$(puppet config print certname)
   if [[ ! -f "/etc/puppetlabs/puppet/ssl/certs/${currentCertName}.pem" ]]; then
     puppet config set --section main dns_alt_names $(facter fqdn),$(facter hostname)${$DNS_ALT_NAMES:+,}$DNS_ALT_NAMES
