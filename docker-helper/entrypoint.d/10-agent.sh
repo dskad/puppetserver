@@ -17,6 +17,19 @@ fi
 
 # environment to configure this container
 puppet config set --section agent environment ${AGENT_ENVIRONMENT}
-puppet config set --section main dns_alt_names $(facter fqdn),$(facter hostname),$DNS_ALT_NAMES
 
+# Have to be careful not to change the server's cert when acting as a CA server
+if [[ ! -n "${CA_SERVER}"]]; then
+  currentCertName=$(puppet config print certname)
+  if [[ ! -f "/etc/puppetlabs/puppet/ssl/certs/${currentCertName}.pem" ]]; then
+    puppet config set --section main dns_alt_names $(facter fqdn),$(facter hostname)${$DNS_ALT_NAMES:+,}$DNS_ALT_NAMES
+  else
+    echo "Notice: CERTNAME/DNS_ALT_NAMES not updated. A certificate for ${currentCertName} already exists."
+    echo "        Revoke or remove this certificate to change CERTNAME/DNS_ALT_NAMES."
+    echo "        You may need to reissue client certificates."
+  fi
+else
+  # We're not the CA server, we call ourselves anything we want!
+  puppet config set --section main dns_alt_names $(facter fqdn),$(facter hostname)${$DNS_ALT_NAMES:+,}$DNS_ALT_NAMES
+fi
 
