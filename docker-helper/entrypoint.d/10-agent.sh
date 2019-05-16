@@ -22,7 +22,7 @@ puppet config set --section agent environment ${AGENT_ENVIRONMENT}
 if [[ ! -n "${CA_SERVER}" ]]; then
   currentCertName=$(puppet config print certname)
   if [[ ! -f "/etc/puppetlabs/puppet/ssl/certs/${currentCertName}.pem" ]]; then
-    puppet config set --section main dns_alt_names $(facter fqdn),$(facter hostname)${$DNS_ALT_NAMES:+,}$DNS_ALT_NAMES
+    puppet config set --section main dns_alt_names $(facter fqdn),$(facter hostname)${DNS_ALT_NAMES:+,}$DNS_ALT_NAMES
   else
     echo "Notice: CERTNAME/DNS_ALT_NAMES not updated. A certificate for ${currentCertName} already exists."
     echo "        Revoke or remove this certificate to change CERTNAME/DNS_ALT_NAMES."
