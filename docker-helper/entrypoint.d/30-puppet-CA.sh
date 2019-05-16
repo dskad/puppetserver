@@ -7,11 +7,24 @@ if [[ -n "${AUTOSIGN}" ]] ; then
   puppet config set autosign "$AUTOSIGN" --section master
 fi
 
-# To allow infrastructure scaling like compile masters and puppetdb clusters
+# allow CA to sign certificate requests that have subject alternative names
+#   to allow infrastructure scaling like compile masters and puppetdb clusters
 # TODO: investigate server code to see if this can be done in autosign.config or other code change instead of globally
 if [[ -n "${ALLOW_SUBJECT_ALT_NAMES}" ]]; then
   sed -i "s/#\?\s\+allow-subject-alt-names.*/allow-subject-alt-names: true/" /etc/puppetlabs/puppetserver/conf.d/ca.conf
 fi
+
+# allow CA to sign certificate requests that have authorization extensions
+if [[ -n "${ALLOW_AUTHORIZATION_EXTENSIONS}" ]]; then
+  sed -i "s/#\?\s\+allow-authorization-extensions.*/allow-authorization-extensions: true/" /etc/puppetlabs/puppetserver/conf.d/ca.conf
+fi
+
+# TODO: Allow Infrastructure certificate revocation list
+# Add support to add infra list at $cadir/infra_inventory.txt
+# https://puppet.com/docs/puppetserver/6.0/infrastructure_crl.html
+# if [[ -n "${ENABLE_INFRA_CRL}" ]]; then
+#   sed -i "s/#\?\s\+enable-infra-crl.*/enable-infra-crl: true/" /etc/puppetlabs/puppetserver/conf.d/ca.conf
+# fi
 
 # If CA server is supplied, disable the local CA and configure the CA server host and port (optionally)
 if [[ -n "${CA_SERVER}" ]]; then

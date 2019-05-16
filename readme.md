@@ -2,7 +2,7 @@
 
 Use these variables when building or running a Puppet Server container to configure puppet server
 
-## Build time configuration
+## Build Time Configuration Options
 
 ----
 
@@ -13,7 +13,7 @@ Use these variables when building or running a Puppet Server container to config
 | HIERA_EYAML_VERSION  | Version of Hirea Eyaml to install   |
 | DUMB_INIT_VERSION    | Version of Dumb Init to install     |
 
-## Run time configuration
+## Run Time Configuration Options
 
 ----
 
@@ -39,14 +39,15 @@ Use these variables when building or running a Puppet Server container to config
 
 ### Puppet Server
 
-| Variable                | Default Values | Description                                                                                          |
-| ----------------------- | -------------- | ---------------------------------------------------------------------------------------------------- |
-| JAVA_ARGS               | -Xms2g -Xmx2g  | Set Puppet Server's java options                                                                     |
-| AUTOSIGN                | True           | Turn on basic auto signing of certificate requests                                                   |
-| ALLOW_SUBJECT_ALT_NAMES | True           | Allow puppet CA to sign certificates with subject alternative names                                  |
-| ENVIRONMENT_TIMEOUT     | 0              | Set to `0` or `unlimited`. How long the Puppet master should cache data it loads from an environment |
-| PUPPETDB_SERVER_URLS    | < none >       | Comma separated list of PuppetDB server URLs                                                         |
-| SOFT_WRITE_FAILURE      | True           | Gracefully fail puppet runs when PuppetDB servers aren't available                                   |
+| Variable                       | Default Values | Description                                                                                          |
+| ------------------------------ | -------------- | ---------------------------------------------------------------------------------------------------- |
+| JAVA_ARGS                      | -Xms2g -Xmx2g  | Set Puppet Server's java options                                                                     |
+| AUTOSIGN                       | True           | Turn on basic auto signing of certificate requests                                                   |
+| ALLOW_SUBJECT_ALT_NAMES        | True           | Allow puppet CA to sign certificates with subject alternative names                                  |
+| ALLOW_AUTHORIZATION_EXTENSIONS | False          | Allow CA to sign certificate requests that have authorization extensions                             |
+| ENVIRONMENT_TIMEOUT            | 0              | Set to `0` or `unlimited`. How long the Puppet master should cache data it loads from an environment |
+| PUPPETDB_SERVER_URLS           | < none >       | Comma separated list of PuppetDB server URLs                                                         |
+| SOFT_WRITE_FAILURE             | True           | Gracefully fail puppet runs when PuppetDB servers aren't available                                   |
 
 ### R10k
 
