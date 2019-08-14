@@ -7,5 +7,5 @@ fi
 
 # Apply current config for this instance. Use volumes retain config across container restarts
 if [[ "${RUN_PUPPET_AGENT_ON_START}" = "true" ]]; then
-  puppet apply /etc/puppetlabs/code/environments/${AGENT_ENVIRONMENT}/manifests/site.pp -v
+  puppet apply /etc/puppetlabs/code/environments/"${AGENT_ENVIRONMENT}"/manifests/site.pp -v
 fi

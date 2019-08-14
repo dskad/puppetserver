@@ -16,10 +16,12 @@ if [[ -n "${PUPPETDB_SERVER_URLS}" ]]; then
   fi
 
   if [[ ! -f /etc/puppetlabs/puppet/routes.yaml ]]; then
-    echo "---" > /etc/puppetlabs/puppet/routes.yaml
-    echo "master:" >> /etc/puppetlabs/puppet/routes.yaml
-    echo "  facts:" >> /etc/puppetlabs/puppet/routes.yaml
-    echo "    terminus: puppetdb" >> /etc/puppetlabs/puppet/routes.yaml
-    echo "    cache: yaml" >> /etc/puppetlabs/puppet/routes.yaml
+    cat <<EOF > /etc/puppetlabs/puppet/routes.yaml
+--
+master:
+  facts:
+    terminus: puppetdb
+    cache: yaml
+EOF
   fi
 fi

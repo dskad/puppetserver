@@ -7,5 +7,5 @@
 
 # Should  be either 0 or unlimited. 0 is default, unlimited requires calling environment refresh API
 if [[ -n "${ENVIRONMENT_TIMEOUT}" ]]; then
-  puppet config set environment_timeout ${ENVIRONMENT_TIMEOUT}
+  puppet config set environment_timeout "${ENVIRONMENT_TIMEOUT}"
 fi

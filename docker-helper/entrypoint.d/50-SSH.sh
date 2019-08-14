@@ -10,7 +10,7 @@ fi
 
 # Generate SSH key pair for R10k if it doesn't exist
 if [[ ! -f  /etc/puppetlabs/ssh/id_key ]]; then
-  ssh-keygen  -f /etc/puppetlabs/ssh/id_key -t ${GENERATED_SSH_KEY_TYPE} -N "" -C "$(facter fqdn)"
+  ssh-keygen  -f /etc/puppetlabs/ssh/id_key -t "${GENERATED_SSH_KEY_TYPE}" -N "" -C "$(facter fqdn)"
   if [[ ${SHOW_SSH_KEY} = "true" ]]; then
     echo "SSH public key:"
     cat /etc/puppetlabs/ssh/id_key.pub

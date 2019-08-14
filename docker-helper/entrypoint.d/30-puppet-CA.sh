@@ -41,7 +41,7 @@ if [[ -n "${CA_SERVER}" ]]; then
   fi
 
   # Wait for the CA server to spin up, in case the infra was started all at the same time
-  while ! (echo > /dev/tcp/${CA_SERVER}/${CA_PORT}) >/dev/null 2>&1; do
+  while ! (echo > /dev/tcp/"${CA_SERVER}"/"${CA_PORT}") >/dev/null 2>&1; do
     echo 'Waiting for puppet CA server to become available...'
     sleep 10
   done
@@ -53,17 +53,19 @@ if [[ -n "${CA_SERVER}" ]]; then
     --no-daemonize \
     --onetime \
     --noop \
-    --server ${CA_SERVER} \
-    --masterport ${CA_PORT} \
+    --server "${CA_SERVER}" \
+    --masterport "${CA_PORT}" \
     --environment production \
     --waitforcert 30s
 
   # Update puppetserver webserver.conf to point to new certificates from puppet run.
   # When CA is disabled, puppetserver won't run without ssl-crl-path set, if that is set, the others have to be set
   sed -i '/}/d' /etc/puppetlabs/puppetserver/conf.d/webserver.conf
-  echo "    ssl-cert: $(puppet config print hostcert)" >> /etc/puppetlabs/puppetserver/conf.d/webserver.conf
-  echo "    ssl-key: $(puppet config print hostprivkey)" >> /etc/puppetlabs/puppetserver/conf.d/webserver.conf
-  echo "    ssl-ca-cert: $(puppet config print localcacert)" >> /etc/puppetlabs/puppetserver/conf.d/webserver.conf
-  echo "    ssl-crl-path: $(puppet config print hostcrl)" >> /etc/puppetlabs/puppetserver/conf.d/webserver.conf
-  echo "}" >> /etc/puppetlabs/puppetserver/conf.d/webserver.conf
+  cat <<EOF >> /etc/puppetlabs/puppetserver/conf.d/webserver.conf
+    ssl-cert: $(puppet config print hostcert)
+    ssl-key: $(puppet config print hostprivkey)
+    ssl-ca-cert: $(puppet config print localcacert)
+    ssl-crl-path: $(puppet config print hostcrl)
+  }
+EOF
 fi
