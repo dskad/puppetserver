@@ -1,46 +1,70 @@
-# PuppetBox
+# Puppet Server in Docker <!-- omit in toc -->
+
+## Table of Contents <!-- omit in toc -->
+
+- [OVERVIEW](#overview)
+- [QUICK START](#quick-start)
+- [PORT MAPPING](#port-mapping)
+- [VOLUMES AND PERSISTENT DATA](#volumes-and-persistent-data)
+- [DEPLOYMENT TYPES](#deployment-types)
+  - [STANDALONE](#standalone)
+  - [DEDICATED CA](#dedicated-ca)
+  - [COMPILE MASTERS](#compile-masters)
+- [PUPPETDB INTEGRATION](#puppetdb-integration)
+- [R10K USAGE](#r10k-usage)
+- [CONTAINER CONFIGURATION](#container-configuration)
+  - [BUILD TIME CONFIGURATION OPTIONS](#build-time-configuration-options)
+  - [RUN TIME CONFIGURATION OPTIONS](#run-time-configuration-options)
+    - [GENERAL](#general)
+    - [PUPPET AGENT](#puppet-agent)
+    - [PUPPET SERVER](#puppet-server)
+    - [R10K](#r10k)
 
 ---
 
-## Table of Contents
+---
 
-- [PuppetBox](#puppetbox)
-  - [Table of Contents](#table-of-contents)
-  - [Overview](#overview)
-  - [Quick Start](#quick-start)
-  - [Deployment Types](#deployment-types)
-    - [Standalone](#standalone)
-    - [Dedicated CA](#dedicated-ca)
-    - [Master - Replica](#master---replica)
-  - [Container Environment Variable Configuration](#container-environment-variable-configuration)
-    - [Build Time Configuration Options](#build-time-configuration-options)
-    - [Run Time Configuration Options](#run-time-configuration-options)
-      - [General](#general)
-      - [Puppet Agent](#puppet-agent)
-      - [Puppet Server](#puppet-server)
-      - [R10k](#r10k)
+## OVERVIEW
 
 ---
 
-## Overview
+## QUICK START
 
-## Quick Start
+---
 
-## Deployment Types
+## PORT MAPPING
 
-### Standalone
+---
 
-### Dedicated CA
+## VOLUMES AND PERSISTENT DATA
 
-### Master - Replica
+---
 
-Coming soon
+## DEPLOYMENT TYPES
 
-## Container Environment Variable Configuration
+### STANDALONE
 
-Use these variables when building or running a Puppet Server container to configure puppet server
+### DEDICATED CA
 
-### Build Time Configuration Options
+### COMPILE MASTERS
+
+---
+
+## PUPPETDB INTEGRATION
+
+---
+
+## R10K USAGE
+
+---
+
+---
+
+## CONTAINER CONFIGURATION
+
+Use these environment variables when building or running a Puppet Server container to configure the puppet server.
+
+### BUILD TIME CONFIGURATION OPTIONS
 
 ---
 
@@ -51,18 +75,18 @@ Use these variables when building or running a Puppet Server container to config
 |  **HIERA_EYAML_VERSION** | Version of Hirea Eyaml to install   |
 |    **DUMB_INIT_VERSION** | Version of Dumb Init to install     |
 
-### Run Time Configuration Options
+### RUN TIME CONFIGURATION OPTIONS
 
 ---
 
-#### General
+#### GENERAL
 
-|                 **Variable** | Default Values | Description                                            |
-| ---------------------------: | -------------- | ------------------------------------------------------ |
-|                    **DEBUG** | False          | Show commands and arguments when running entrypoint.sh |
-| **HEALTHCHECK_ENVIRONMENT:** | production     | Puppet environment to use when checking server health. |
+|                **Variable** | Default Values | Description                                            |
+| --------------------------: | -------------- | ------------------------------------------------------ |
+|                   **DEBUG** | False          | Show commands and arguments when running entrypoint.sh |
+| **HEALTHCHECK_ENVIRONMENT** | production     | Puppet environment to use when checking server health. |
 
-#### Puppet Agent
+#### PUPPET AGENT
 
 |                  **Variable** | Default Values                      | Description                                                                        |
 | ----------------------------: | ----------------------------------- | ---------------------------------------------------------------------------------- |
@@ -75,7 +99,7 @@ Use these variables when building or running a Puppet Server container to config
 |         **AGENT_ENVIRONMENT** | production                          | Puppet environment to use when running the agent in the container                  |
 | **RUN_PUPPET_AGENT_ON_START** | False                               | Run the agent when the container starts and apply resultant configuration          |
 
-#### Puppet Server
+#### PUPPET SERVER
 
 |                       **Variable** | Default Values | Description                                                                                          |
 | ---------------------------------: | -------------- | ---------------------------------------------------------------------------------------------------- |
@@ -87,7 +111,7 @@ Use these variables when building or running a Puppet Server container to config
 |           **PUPPETDB_SERVER_URLS** | < none >       | Comma separated list of PuppetDB server URLs                                                         |
 |             **SOFT_WRITE_FAILURE** | True           | Gracefully fail puppet runs when PuppetDB servers aren't available                                   |
 
-#### R10k
+#### R10K
 
 |                 **Variable** | Default Values | Description                                                                                              |
 | ---------------------------: | -------------- | -------------------------------------------------------------------------------------------------------- |
