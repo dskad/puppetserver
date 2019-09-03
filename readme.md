@@ -8,8 +8,7 @@
 - [VOLUMES AND PERSISTENT DATA](#volumes-and-persistent-data)
 - [DEPLOYMENT TYPES](#deployment-types)
   - [STANDALONE](#standalone)
-  - [DEDICATED CA](#dedicated-ca)
-  - [COMPILE MASTERS](#compile-masters)
+  - [DEDICATED CA WITH COMPILE MASTERS](#dedicated-ca-with-compile-masters)
 - [PUPPETDB INTEGRATION](#puppetdb-integration)
 - [R10K USAGE](#r10k-usage)
 - [CONTAINER CONFIGURATION](#container-configuration)
@@ -44,9 +43,7 @@
 
 ### STANDALONE
 
-### DEDICATED CA
-
-### COMPILE MASTERS
+### DEDICATED CA WITH COMPILE MASTERS
 
 ---
 
