@@ -2,6 +2,7 @@ FROM centos:7
 
 LABEL maintainer="dskadra@gmail.com"
 
+ENV LANG="en_US.UTF-8"
 ENV PATH="$PATH:/opt/puppetlabs/bin:/opt/puppetlabs/puppet/bin:/opt/puppetlabs/server/bin" \
   FACTER_CONTAINER_ROLE="puppetserver"
 
